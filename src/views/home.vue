@@ -15,71 +15,164 @@ export default {
         return {
             list: [
                 {
-                    name: "首页首页首页首页首页首页",
-                    icon: require("../assets/logo.png")
+                    name: "首页",
+                    icon: require("../assets/logo.png"),
+                    path: "/"
                 },
                 {
-                    name: "管理1管理1管理1管理1",
+                    name: "管理1",
                     icon: require("../assets/logo.png"),
                     children: [
                         {
-                            name: "子项"
+                            name: "子项",
+                            path: "/a"
                         },
                         {
-                            name: "子项"
+                            name: "子项",
+                            path: "/b"
                         },
                         {
-                            name: "子项"
+                            name: "子项",
+                            path: "/c"
                         },
                         {
-                            name: "子项"
-                        },
-                        {
-                            name: "子项"
-                        },
-                        {
-                            name: "子项"
-                        },
-                        {
-                            name: "子项"
+                            name: "子项",
+                            path: "/d"
                         },
                     ]
                 },
                 {
-                    name: "管理2管理2管理2管理2",
+                    name: "管理2",
                     icon: require("../assets/logo.png"),
                     children: [
                         {
-                            name: "子项"
+                            name: "其他项",
+                            path: "/"
                         }
                     ]
                 },
                 {
                     name: "管理3",
                     icon: require("../assets/logo.png"),
+                    path: "/"
                 },
                 {
                     name: "管理4",
                     icon: require("../assets/logo.png"),
+                    path: "/"
                 },
                 {
                     name: "管理5",
                     icon: require("../assets/logo.png"),
+                    path: "/"
                 },
                 {
-                    name: "管理6",
+                    name: "管理3",
                     icon: require("../assets/logo.png"),
+                    path: "/"
                 },
                 {
-                    name: "管理7",
+                    name: "管理4",
                     icon: require("../assets/logo.png"),
+                    path: "/"
                 },
                 {
-                    name: "管理8",
+                    name: "管理5",
                     icon: require("../assets/logo.png"),
+                    path: "/"
+                },
+                {
+                    name: "管理3",
+                    icon: require("../assets/logo.png"),
+                    path: "/"
+                },
+                {
+                    name: "管理4",
+                    icon: require("../assets/logo.png"),
+                    path: "/"
+                },
+                {
+                    name: "管理5",
+                    icon: require("../assets/logo.png"),
+                    path: "/"
+                },
+                {
+                    name: "管理3",
+                    icon: require("../assets/logo.png"),
+                    path: "/"
+                },
+                {
+                    name: "管理4",
+                    icon: require("../assets/logo.png"),
+                    path: "/"
+                },
+                {
+                    name: "管理5",
+                    icon: require("../assets/logo.png"),
+                    path: "/"
+                },
+                {
+                    name: "管理3",
+                    icon: require("../assets/logo.png"),
+                    path: "/"
+                },
+                {
+                    name: "管理4",
+                    icon: require("../assets/logo.png"),
+                    path: "/"
+                },
+                {
+                    name: "管理5",
+                    icon: require("../assets/logo.png"),
+                    path: "/"
+                },
+                {
+                    name: "管理3",
+                    icon: require("../assets/logo.png"),
+                    path: "/"
+                },
+                {
+                    name: "管理4",
+                    icon: require("../assets/logo.png"),
+                    path: "/"
+                },
+                {
+                    name: "管理5",
+                    icon: require("../assets/logo.png"),
+                    path: "/"
+                },
+                {
+                    name: "管理3",
+                    icon: require("../assets/logo.png"),
+                    path: "/"
+                },
+                {
+                    name: "管理4",
+                    icon: require("../assets/logo.png"),
+                    path: "/"
+                },
+                {
+                    name: "管理5",
+                    icon: require("../assets/logo.png"),
+                    path: "/"
+                },
+                {
+                    name: "管理3",
+                    icon: require("../assets/logo.png"),
+                    path: "/"
+                },
+                {
+                    name: "管理4",
+                    icon: require("../assets/logo.png"),
+                    path: "/"
+                },
+                {
+                    name: "管理5",
+                    icon: require("../assets/logo.png"),
+                    path: "/"
                 },
             ],
-            fold: true
+            fold: false
         }
     }
 }
