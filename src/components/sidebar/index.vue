@@ -1,5 +1,5 @@
 <template>
-    <div :class="{sidebar: true, fold}">
+    <div :class="{sidebar: true, fold}" :style="{background}">
         <div class="sidebar_item" v-for="item,index in dataList" :key="index">
             <div class="sidebar_item_title" @click="item.children?clickCollapse(index):clickItem(item)" @mouseenter="movein($event,index)" @mouseleave="leave($event,index)">
                 <div class="icon">
@@ -10,7 +10,7 @@
                     <p>{{ item.name }}</p>
 
                     <div :class="{arrow: true, filp: !item.shrink}">
-                        <img v-if="item.children" src="./assets/arrow.png" alt="">
+                        <img v-if="item.children" src="./static/arrow.png" alt="">
                     </div>
                 </div>
             </div>
@@ -22,7 +22,7 @@
             </div>
             <!-- 悬停选项 -->
             <transition name="fade">
-                <div class="suspend" v-if="item.children" v-show="fold && item.float" @mouseenter="movein($event,index)" @mouseleave="leave($event,index)">
+                <div class="suspend" :style="{background}" v-if="item.children" v-show="fold && item.float" @mouseenter="movein($event,index)" @mouseleave="leave($event,index)">
                     <p v-for="n,m in item.children" :key="m" @click="clickItem(n)">{{ n.name }}</p>
                 </div>
             </transition>
@@ -37,7 +37,7 @@ export default {
     data() {
         return {
             dataList: [],
-            unfold: []
+            unfold: [],
         }
     },
     created() {
@@ -151,15 +151,11 @@ export default {
             width: 100%;
             min-height: 50px;
             font-size: 16px;
-            transition: all 0.1s;
+            transition: all 1s;
             display: flex;
             align-items: center;
             box-sizing: border-box;
             padding: 0 20px;
-
-            &:hover {
-                background: rebeccapurple;
-            }
 
             .icon {
                 width: 20px;
@@ -232,27 +228,34 @@ export default {
 
         .fade-enter-active,
         .fade-leave-active {
-            transition: all 0.2s;
-            transform-origin: 10% 10%;
+            transition-property: transform, opacity;
+            transition-duration: 0.2s;
+            transform-origin: 0 0;
             z-index: 0;
         }
 
         .fade-enter,
         .fade-leave-to {
             opacity: 0;
-            transform: scale(0.8);
-            transform-origin: 10% 10%;
+            transform: scale(0.6);
+            transform-origin: 0 0;
             z-index: 0;
         }
 
         .suspend {
-            width: 160px;
-            height: 50px;
-            line-height: 50px;
-            background: #96989c;
-            box-sizing: border-box;
-            padding: 0 20px;
             position: fixed;
+
+            p {
+                width: 160px;
+                height: 50px;
+                line-height: 50px;
+                box-sizing: border-box;
+                padding: 0 20px;
+
+                &:hover {
+                    background: rebeccapurple;
+                }
+            }
         }
     }
 }
