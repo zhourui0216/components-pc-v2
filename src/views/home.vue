@@ -13,166 +13,116 @@ export default {
     },
     data() {
         return {
-            list: [
-                {
-                    name: "首页",
-                    icon: require("../assets/logo.png"),
-                    path: "/"
+            list: [{
+                name: "首页",
+                path: "/",
+                icon: require("../assets/logo.png"),
+                children: [{
+                    name: "机构业绩",
+                    path: "/home/agencyAchievement"
+                }]
+            },
+            {
+                name: "服务管理",
+                icon: require("../assets/logo.png"),
+                children: [{
+                    name: "服务类型",
+                    path: "/serviceManage/serviceType"
                 },
                 {
-                    name: "管理1",
-                    icon: require("../assets/logo.png"),
-                    children: [
-                        {
-                            name: "子项",
-                            path: "/a"
-                        },
-                        {
-                            name: "子项",
-                            path: "/b"
-                        },
-                        {
-                            name: "子项",
-                            path: "/c"
-                        },
-                        {
-                            name: "子项",
-                            path: "/d"
-                        },
-                    ]
+                    name: "服务商品",
+                    path: "/serviceManage/serviceGoods"
                 },
                 {
-                    name: "管理2",
-                    icon: require("../assets/logo.png"),
-                    children: [
-                        {
-                            name: "其他项",
-                            path: "/"
-                        }
-                    ]
+                    name: "推荐服务",
+                    path: "/serviceManage/recommendedServices"
+                }]
+            },
+            {
+                name: "佣工管理",
+                icon: require("../assets/logo.png"),
+                children: [{
+                    name: "服务佣工",
+                    path: "/servantsManage/serviceServant"
                 },
                 {
-                    name: "管理3",
-                    icon: require("../assets/logo.png"),
-                    path: "/"
+                    name: "品牌佣工",
+                    path: "/servantsManage/brandServant"
                 },
                 {
-                    name: "管理4",
-                    icon: require("../assets/logo.png"),
-                    path: "/"
+                    name: "在线佣工",
+                    path: "/servantsManage/onlineHelpers"
                 },
                 {
-                    name: "管理5",
-                    icon: require("../assets/logo.png"),
-                    path: "/"
+                    name: "佣工审核",
+                    path: "/servantsManage/helperReview"
                 },
                 {
-                    name: "管理3",
-                    icon: require("../assets/logo.png"),
-                    path: "/"
+                    name: "证书类型",
+                    path: "/servantsManage/certificateType"
                 },
                 {
-                    name: "管理4",
-                    icon: require("../assets/logo.png"),
-                    path: "/"
+                    name: "证书审核",
+                    path: "/servantsManage/certificateAudit"
+                }]
+            },
+            {
+                name: "订单管理",
+                icon: require("../assets/logo.png"),
+                children: [{
+                    name: "订单列表",
+                    path: "/orderManage/orderList"
                 },
                 {
-                    name: "管理5",
-                    icon: require("../assets/logo.png"),
-                    path: "/"
+                    name: "订单转单",
+                    path: "/orderManage/orderTransfer"
+                }]
+            },
+            {
+                name: "轮播图管理",
+                icon: require("../assets/logo.png"),
+                children: [{
+                    name: "小程序&可视对讲",
+                    path: "/bannerManage/appletBanner"
                 },
                 {
-                    name: "管理3",
-                    icon: require("../assets/logo.png"),
-                    path: "/"
+                    name: "App",
+                    path: "/bannerManage/appBanner"
+                }]
+            },
+            {
+                name: "信息管理",
+                icon: require("../assets/logo.png"),
+                children: [{
+                    name: "用户信息",
+                    path: "/infoManage/customerInfo"
                 },
                 {
-                    name: "管理4",
-                    icon: require("../assets/logo.png"),
-                    path: "/"
+                    name: "反馈列表",
+                    path: "/infoManage/feedbackList"
+                }]
+            },
+            {
+                name: "机构管理",
+                icon: require("../assets/logo.png"),
+                children: [{
+                    name: "机构列表",
+                    path: "/agencyManage/agencyList"
                 },
                 {
-                    name: "管理5",
-                    icon: require("../assets/logo.png"),
-                    path: "/"
-                },
-                {
-                    name: "管理3",
-                    icon: require("../assets/logo.png"),
-                    path: "/"
-                },
-                {
-                    name: "管理4",
-                    icon: require("../assets/logo.png"),
-                    path: "/"
-                },
-                {
-                    name: "管理5",
-                    icon: require("../assets/logo.png"),
-                    path: "/"
-                },
-                {
-                    name: "管理3",
-                    icon: require("../assets/logo.png"),
-                    path: "/"
-                },
-                {
-                    name: "管理4",
-                    icon: require("../assets/logo.png"),
-                    path: "/"
-                },
-                {
-                    name: "管理5",
-                    icon: require("../assets/logo.png"),
-                    path: "/"
-                },
-                {
-                    name: "管理3",
-                    icon: require("../assets/logo.png"),
-                    path: "/"
-                },
-                {
-                    name: "管理4",
-                    icon: require("../assets/logo.png"),
-                    path: "/"
-                },
-                {
-                    name: "管理5",
-                    icon: require("../assets/logo.png"),
-                    path: "/"
-                },
-                {
-                    name: "管理3",
-                    icon: require("../assets/logo.png"),
-                    path: "/"
-                },
-                {
-                    name: "管理4",
-                    icon: require("../assets/logo.png"),
-                    path: "/"
-                },
-                {
-                    name: "管理5",
-                    icon: require("../assets/logo.png"),
-                    path: "/"
-                },
-                {
-                    name: "管理3",
-                    icon: require("../assets/logo.png"),
-                    path: "/"
-                },
-                {
-                    name: "管理4",
-                    icon: require("../assets/logo.png"),
-                    path: "/"
-                },
-                {
-                    name: "管理5",
-                    icon: require("../assets/logo.png"),
-                    path: "/"
-                },
-            ],
-            fold: false
+                    name: "机构账户",
+                    path: "/agencyManage/agencyAccount"
+                }]
+            },
+            {
+                name: "系统管理",
+                icon: require("../assets/logo.png"),
+                children: [{
+                    name: "账户列表",
+                    path: "/systemManage/accountList"
+                }]
+            }],
+            fold: true
         }
     }
 }

@@ -1,31 +1,44 @@
 <template>
-    <div :class="{sidebar: true, fold}" :style="{background}">
-        <div class="sidebar_item" v-for="item,index in dataList" :key="index">
-            <div class="sidebar_item_title" @click="item.children?clickCollapse(index):clickItem(item)" @mouseenter="movein($event,index)" @mouseleave="leave($event,index)">
-                <div class="icon">
-                    <img v-if="item.icon" :src="item.icon">
+    <div class="sidebar" :style="{width: fold ? foldWidth : width, background}">
+        <!-- 打开 -->
+        <div class="open" v-if="!fold">
+            <div class="item" v-for="item,index in dataList" :key="index">
+                <div class="title" @click="item.path ? jump(item.path) : openOption(index)">
+                    <div class="icon">
+                        <img :src="item.icon" alt="">
+                    </div>
+
+                    <div class="name">
+                        <p :style="{color}">{{ item.name }}</p>
+                    </div>
+
+                    <div class="arrow">
+                        <img v-if="!item.path" src="./static/arrow.png" alt="">
+                    </div>
                 </div>
 
-                <div :class="{title: true, hide: fold}">
-                    <p>{{ item.name }}</p>
-
-                    <div :class="{arrow: true, filp: !item.shrink}">
-                        <img v-if="item.children" src="./static/arrow.png" alt="">
+                <!-- 选项 -->
+                <div class="option" :style="{height: item.open ? heightList[index] + 'px' : 0}" v-if="!item.path">
+                    <div class="container">
+                        <p :style="{color}" v-for="n,m in item.children" :key="m">
+                            {{ n.name }}
+                        </p>
                     </div>
                 </div>
             </div>
-            <!-- 折叠选项 -->
-            <div class="subitem" :style="{height: item.shrink ? 0 : unfold[index] + 'px'}" v-if="item.children">
-                <div :class="{container: true, hide: fold}">
-                    <p v-for="n,m in item.children" :key="m" @click="clickItem(n)">{{ n.name }}</p>
+        </div>
+        <!-- 收起 -->
+        <div class="stow" v-else @scroll="scroll">
+            <div class="item" v-for="item,index in dataList" :key="index">
+                <img class="icon" :src="item.icon" alt="">
+
+                <!-- 选项 -->
+                <div class="option">
+                    <p :style="{color}" v-for="n,m in item.children" :key="m">
+                        {{ n.name }}
+                    </p>
                 </div>
             </div>
-            <!-- 悬停选项 -->
-            <transition name="fade">
-                <div class="suspend" :style="{background}" v-if="item.children" v-show="fold && item.float" @mouseenter="movein($event,index)" @mouseleave="leave($event,index)">
-                    <p v-for="n,m in item.children" :key="m" @click="clickItem(n)">{{ n.name }}</p>
-                </div>
-            </transition>
         </div>
     </div>
 </template>
@@ -37,86 +50,83 @@ export default {
     data() {
         return {
             dataList: [],
-            unfold: [],
+            heightList: [],
         }
     },
     created() {
-        this.changeFoldState(true);
-        this.changeFloatState(false);
+        if (this.fold) {
+            sessionStorage.removeItem("openState");
+        }
+        this.addCollapseState();
     },
     mounted() {
-        this.getSubitemHeight();
+        this.getUnfoldHeight();
     },
     methods: {
-        // 获取子选项高度
-        getSubitemHeight() {
-            let item = Array.from(document.querySelectorAll(".sidebar_item"));
+        // 添加折叠状态
+        addCollapseState() {
+            let openState = JSON.parse(sessionStorage.getItem("openState"))
+            console.log(this.fold)
+            this.dataList = this.list.map((i, j) => {
+                i.open = false;
+                i.hover = false;
+                return i;
+            });
+        },
+        // 获取选项展开高度
+        getUnfoldHeight() {
+            let item = Array.from(document.querySelectorAll(".sidebar .open .item"));
+            console.log(item)
             item.forEach((i, j) => {
-                let subitem = i.querySelector(".container");
-                this.unfold[j] = subitem ? subitem.offsetHeight : 0;
+                let subitem = i.querySelector(".item .option .container");
+                if (subitem) {
+                    subitem.style.height = subitem.offsetHeight + "px";
+                    this.heightList[j] = subitem.offsetHeight;
+                } else {
+                    this.heightList[j] = 0;
+                }
             })
+            console.log(this.heightList)
         },
-        // 改变折叠状态
-        changeFoldState(val) {
-            this.dataList = this.list.map(i => {
-                i.shrink = val;
-                return i;
-            })
-        },
-        // 改变悬停状态
-        changeFloatState(val) {
-            this.dataList = this.list.map(i => {
-                i.float = val;
-                return i;
-            })
-        },
-        // 移入
-        movein(e, index) {
-            if (!this.fold) return;
-            this.dataList[index].float = true;
+        // 展开选项
+        openOption(index) {
+            console.log(index)
+            this.dataList[index].open = !this.dataList[index].open;
             this.$forceUpdate();
 
-            let item_el = document.querySelectorAll(".sidebar_item")[index]
-            let suspend_el = item_el.querySelector(".suspend")
-            if (suspend_el) {
-                suspend_el.style.top = item_el.offsetTop + "px";
-                suspend_el.style.left = item_el.offsetWidth + "px";
-            }
+            let openState = JSON.stringify(this.dataList.map(i => i.open));
+            sessionStorage.setItem("openState", openState);
         },
-        // 离开
-        leave(e, index) {
-            if (!this.fold) return;
-            console.log("移出")
-            this.dataList[index].float = false;
-            this.$forceUpdate();
+        // 滚动
+        scroll(e) {
+            console.log(e.target.scrollTop)
         },
-        // 点击标题
-        clickTitle(item) {
-            console.log(item)
-            console.log("点击项")
-        },
-        // 点击折叠选项
-        clickCollapse(index) {
-            if (this.fold) return;
-            this.dataList[index].shrink = !this.dataList[index].shrink;
-            this.$forceUpdate();
-        },
-        // 点击选项
-        clickItem(item) {
-            if (this.$route.path == item.path) {
+        // 跳转
+        jump(url) {
+            console.log("跳转")
+            if (this.$route.path == url) {
+                // 刷新页面
                 // location.reload();
                 return
             }
-            this.$router.push(item.path);
+            this.$router.push({ path: url })
         },
     },
     watch: {
+        /**
+         * 监听折叠状态
+         * 折叠时，关闭所有
+         * 若fold初始状态为true(折叠)，再展开时，只要有二级菜单，就获取展开高度
+         */
         fold(val) {
             if (val) {
-                this.changeFoldState(true);
+                this.addCollapseState();
+                sessionStorage.removeItem("openState");
             } else {
                 setTimeout(e => {
-                    this.getSubitemHeight();
+                    if (this.dataList.some(i => !i.path)) {
+                        this.getUnfoldHeight();
+                    }
                 }, 0)
             }
         },
@@ -126,88 +136,94 @@ export default {
 
 <style scoped lang="scss">
 .sidebar {
-    width: 200px;
     height: 100%;
-    background: #ccc;
     user-select: none;
-    overflow-x: hidden;
-    overflow-y: auto;
-    transition: 0.4s;
-    // 火狐滚动条
-    scrollbar-width: thin;
-    scrollbar-color: #96989c #333744;
+    transition: all 0.4s;
 
-    &::-webkit-scrollbar {
-        width: 8px;
-        background: #333744;
+    .open,
+    .stow {
+        width: 100%;
+        height: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+
+        scrollbar-width: thin; // Firefox
+        scrollbar-color: #96989c #333744; // Firefox
+
+        &::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+            background: #333744;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: #96989c;
+        }
+
+        &::-webkit-scrollbar-corner {
+            background: #333744;
+        }
     }
 
-    &::-webkit-scrollbar-thumb {
-        background: #96989c;
-    }
-
-    &_item {
-        &_title {
+    .open {
+        .item {
             width: 100%;
-            min-height: 50px;
-            font-size: 16px;
-            transition: all 1s;
-            display: flex;
-            align-items: center;
-            box-sizing: border-box;
-            padding: 0 20px;
-
-            .icon {
-                width: 20px;
-                min-width: 20px;
-                height: 20px;
-                margin-right: 10px;
-
-                img {
-                    width: 20px;
-                    height: 20px;
-                }
-            }
 
             .title {
+                width: 100%;
+                height: 50px;
                 display: flex;
                 align-items: center;
+                box-sizing: border-box;
+                padding: 0 0 0 20px;
+                cursor: pointer;
 
-                p {
-                    width: 120px;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    white-space: nowrap;
-                }
-
-                .arrow {
-                    width: 10px;
-                    height: 10px;
-                    transition: all 0.4s;
+                .icon {
+                    width: 20px;
+                    min-width: 20px;
+                    height: 20px;
+                    margin-right: 10px;
 
                     img {
-                        width: 10px;
-                        height: 10px;
+                        width: 100%;
+                        height: 100%;
                         display: block;
                     }
                 }
 
-                .filp {
-                    transform: rotate(180deg);
-                    transform-origin: 50% 50%;
+                .name {
+                    width: 115px;
+                    min-width: 115px;
+
+                    p {
+                        width: 100%;
+                        font-size: 16px;
+                        display: block;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                    }
+                }
+
+                .arrow {
+                    width: 10px;
+                    min-width: 10px;
+                    height: 10px;
+                    margin-left: 5px;
+
+                    img {
+                        width: 100%;
+                        height: 100%;
+                        display: block;
+                    }
                 }
             }
 
-            .hide {
-                display: none;
-            }
-        }
+            .option {
+                width: 100%;
+                overflow: hidden;
+                transition: all 0.4s;
 
-        .subitem {
-            overflow: hidden;
-            transition: all 0.4s;
-
-            .container {
                 p {
                     width: 100%;
                     height: 40px;
@@ -217,50 +233,37 @@ export default {
                     text-overflow: ellipsis;
                     white-space: nowrap;
                     box-sizing: border-box;
-                    padding: 0 30px 0 50px;
-                }
-            }
-
-            .hide {
-                display: none;
-            }
-        }
-
-        .fade-enter-active,
-        .fade-leave-active {
-            transition-property: transform, opacity;
-            transition-duration: 0.2s;
-            transform-origin: 0 0;
-            z-index: 0;
-        }
-
-        .fade-enter,
-        .fade-leave-to {
-            opacity: 0;
-            transform: scale(0.6);
-            transform-origin: 0 0;
-            z-index: 0;
-        }
-
-        .suspend {
-            position: fixed;
-
-            p {
-                width: 160px;
-                height: 50px;
-                line-height: 50px;
-                box-sizing: border-box;
-                padding: 0 20px;
-
-                &:hover {
-                    background: rebeccapurple;
+                    padding: 0 20px 0 50px;
+                    cursor: pointer;
                 }
             }
         }
     }
-}
 
-.fold {
-    width: 60px;
+    .stow {
+        .item {
+            width: 100%;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            box-sizing: border-box;
+            padding-left: 20px;
+
+            .icon {
+                width: 20px;
+                height: 20px;
+            }
+
+            .option {
+                position: fixed;
+                left: 60px;
+                z-index: 1000;
+                cursor: pointer;
+
+                p {
+                }
+            }
+        }
+    }
 }
 </style>

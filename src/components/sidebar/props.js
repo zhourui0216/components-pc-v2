@@ -5,25 +5,30 @@ export default {
             type: Array,
             required: true
         },
-        // 折叠
+        // 是否折叠
         fold: {
             type: Boolean,
             default: false
         },
+        // 宽度
+        width: {
+            type: String,
+            default: "200px"
+        },
+        // 折叠宽度
+        foldWidth: {
+            type: String,
+            default: "60px"
+        },
+        // 字体颜色
+        color: {
+            type: String,
+            default: "#000000"
+        },
         // 背景色
         background: {
             type: String,
-            default: "#ffffff"
-        },
-        // 选项移入背景色
-        item_active: {
-            type: String,
             default: "#cccccc"
-        },
-        // 子选项移入背景色
-        subitem_active: {
-            type: String,
-            default: "#e2e2e2"
         }
     }
 }
