@@ -122,7 +122,7 @@ export default {
                     path: "/systemManage/accountList"
                 }]
             }],
-            fold: true
+            fold: false
         }
     }
 }

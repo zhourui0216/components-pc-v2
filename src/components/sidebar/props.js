@@ -10,16 +10,6 @@ export default {
             type: Boolean,
             default: false
         },
-        // 宽度
-        width: {
-            type: String,
-            default: "200px"
-        },
-        // 折叠宽度
-        foldWidth: {
-            type: String,
-            default: "60px"
-        },
         // 字体颜色
         color: {
             type: String,
@@ -29,6 +19,16 @@ export default {
         background: {
             type: String,
             default: "#cccccc"
+        },
+        // 选中颜色
+        active_col: {
+            type: String,
+            default: "#ffffff"
+        },
+        // 选中背景
+        active_bg: {
+            type: String,
+            default: "#333744"
         }
     }
 }
