@@ -1,7 +1,7 @@
 <template>
     <div class="sidebar" :style="{width: fold ? '60px' : '200px', background}">
         <!-- 打开 -->
-        <div class="open" v-if="!fold">
+        <div class="open" v-show="!fold">
             <div class="item" v-for="item,index in dataList" :key="index">
                 <div class="title" @click="item.path ? jump(item.path) : openOption(index)">
                     <div class="icon">
@@ -30,8 +30,8 @@
             </div>
         </div>
         <!-- 收起 -->
-        <div class="stow" v-else @scroll="scroll">
-            <div class="item" :style="{background: active[0]===index ? active_bg : ''}" v-for="item,index in dataList" :key="index" @mouseenter="movein($event, index)" @mouseleave="remove(index)">
+        <div class="stow" v-show="fold" @scroll="scroll">
+            <div class="item" :style="{background: active[0]===index ? active_bg : ''}" v-for="item,index in dataList" :key="index" @mouseenter="movein($event, index)" @mouseleave="remove(index)" @click="item.path ? jump(item.path) : ''">
                 <img class="icon" :src="item.icon" alt="">
 
                 <!-- 选项 -->
@@ -163,8 +163,7 @@ export default {
         // 跳转
         jump(url) {
             if (this.$route.path == url) {
-                // 刷新页面
-                // location.reload();
+                console.log(this.$route.path)
                 return
             }
             this.$router.push({ path: url })
@@ -325,7 +324,6 @@ export default {
                 transform: scale(0.6);
                 transform-origin: 0 0;
                 opacity: 0;
-                z-index: 0;
             }
 
             .scale-enter-active,
@@ -333,7 +331,6 @@ export default {
                 transition-property: transform, opacity;
                 transition-duration: 0.2s;
                 transform-origin: 0 0;
-                z-index: 0;
             }
 
             .option {
