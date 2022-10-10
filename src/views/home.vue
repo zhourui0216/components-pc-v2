@@ -2,14 +2,17 @@
     <div class="home">
         <sidebar :list="list" :fold="fold"></sidebar>
         <button @click="fold=!fold">切换</button>
+        <input-box v-model="value2" clearable show_pw></input-box>
     </div>
 </template>
 
 <script>
-import sidebar from "../components/sidebar/index.vue"
+import sidebar from "../components/sidebar/index.vue";
+import inputBox from "../components/input-box/index.vue"
 export default {
     components: {
-        sidebar
+        sidebar,
+        inputBox
     },
     data() {
         return {
@@ -122,7 +125,14 @@ export default {
                     path: "/systemManage/accountList"
                 }]
             }],
-            fold: false
+            fold: false,
+            value2: 1,
+        }
+    },
+    watch: {
+        value2(v) {
+            console.log("改变：" + v + "," + typeof v)
+            return v
         }
     }
 }
@@ -136,5 +146,6 @@ export default {
     overflow-y: auto;
     display: flex;
     justify-content: space-between;
+    align-items: center;
 }
 </style>
