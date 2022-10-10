@@ -2,7 +2,7 @@
     <div class="home">
         <sidebar :list="list" :fold="fold"></sidebar>
         <button @click="fold=!fold">切换</button>
-        <input-box v-model="value2" clearable show_pw></input-box>
+        <input-box v-model="value2" clearable ></input-box>
     </div>
 </template>
 

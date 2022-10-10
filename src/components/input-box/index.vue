@@ -1,27 +1,34 @@
 <template>
     <div class="input-box">
-        <input :class="{active: active, padr: show_pw}" :type="showpw?'text':'password'" :value="value" :placeholder="placeholder" :minlength="minlength" :maxlength="maxlength" @focus="changeState(true)" @input="entering" @change="change" @blur="changeState(false)">
-        <img src="./static/pw_hide.png" @click="showpw=!showpw" v-show="show_pw && showpw">
-        <img src="./static/pw_show.png" @click="showpw=!showpw" v-show="show_pw && !showpw">
+        <!-- 右侧图标 -->
+        <img class="icon" :src="icon" v-if="icon">
+
+        <input :class="{active: active, padl: icon, padr: clearable || show_pw}" :type="visible?'text':'password'" :value="value" :placeholder="placeholder" :minlength="minlength" :maxlength="maxlength" @focus="changeState(true)" @input="entering" @change="change" @blur="changeState(false)">
+
+        <!-- 清除按钮 -->
+        <img src="./static/clear.png" v-show="clearable && !show_pw" @click="clear()">
+
+        <!-- 密码是否可见 -->
+        <img src="./static/hide_pw.png" @click="visible=!visible" v-show="show_pw && visible">
+        <img src="./static/show_pw.png" @click="visible=!visible" v-show="show_pw && !visible">
     </div>
 </template>
 
 <script>
-import props from "./props.js"
+import props from "./props.js";
 export default {
     mixins: [props],
     data() {
         return {
-            minlength: null,
-            maxlength: null,
-            showpw: false,
+            minlength: null, // 最小长度
+            maxlength: null, // 最大长度
+            visible: true, // 密码可见
             preval: null, // 记录值
             active: false, // 是否获取焦点
             timer: null, // 计时器
         }
     },
     created() {
-        console.log(this.clearable)
         if (this.type == "cardid") {
             this.minlength = 18;
             this.maxlength = 18;
@@ -61,9 +68,9 @@ export default {
                 } else {
                     value = value.replace(/[^0-9]+/, "");
                 }
-            } else if (this.filterChar) {
+            } else if (this.filter_char) {
                 // 未指定类型时可根据传入条件替换传入值
-                value = value.replace(this.filterChar, this.repVal);
+                value = value.replace(this.filter_char, this.rep_val);
             }
 
             this.$emit("input", value);
@@ -76,7 +83,7 @@ export default {
                     this.preval = value;
                     this.$emit("search", value);
                 }
-            }, this.triggerTime)
+            }, this.trigge_time)
         },
         // 改变触发
         change(e) {
@@ -90,6 +97,11 @@ export default {
                 this.$emit("input", value);
             }
         },
+        // 清除内容
+        clear() {
+            this.$emit("input", "");
+            document.querySelector(".input-box input").focus();
+        },
     }
 }
 </script>
@@ -97,6 +109,7 @@ export default {
 <style scoped lang="scss">
 .input-box {
     width: 100%;
+    flex: 1;
     position: relative;
 
     input {
@@ -139,6 +152,11 @@ export default {
         padding-right: 30px !important;
     }
 
+    .icon {
+        left: 6px;
+        cursor: default;
+    }
+
     img {
         width: 20px;
         height: 20px;
@@ -146,7 +164,8 @@ export default {
         display: block;
         position: absolute;
         top: 50%;
-        right: 0;
+        right: 6px;
+        cursor: pointer;
     }
 }
 </style>

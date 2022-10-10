@@ -26,24 +26,29 @@ export default {
             default: null
         },
 
+        // 图标
+        icon: {
+            type: String,
+            default: ""
+        },
         // 清除内容
         clearable: {
             type: Boolean,
             default: false
         },
-        // 密码状态
+        // 显示密码
         show_pw: {
             type: Boolean,
             default: false
         },
 
         // 过滤字符
-        filterChar: {
+        filter_char: {
             type: RegExp,
             default: null
         },
         // 替换字符
-        repVal: {
+        rep_val: {
             type: [String, Number],
             default: ""
         },
@@ -63,7 +68,7 @@ export default {
             default: "输入有误"
         },
         // 触发时间
-        triggerTime: {
+        trigge_time: {
             type: Number,
             default: 1000
         },
