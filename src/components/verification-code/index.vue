@@ -105,9 +105,9 @@ export default {
         },
         drawText(ctx, txt, i) {
             ctx.fillStyle = this.randomColor(this.colorMin, this.colorMax)
-            ctx.font =
-                this.randomNum(this.fontSizeMin, this.fontSizeMax) + 'px SimHei'
-            var x = (i + 1) * (this.contentWidth / (this.identifyCode.length + 1))
+            ctx.font = this.randomNum(this.fontSizeMin, this.fontSizeMax) + 'px SimHei'
+            var bisect = (this.contentWidth - 20) / this.identifyCode.length
+            var x = i * bisect + bisect / 2
             var y = this.randomNum(this.fontSizeMax, this.contentHeight - 5)
             var deg = this.randomNum(-30, 30)
             // 修改坐标原点和旋转角度

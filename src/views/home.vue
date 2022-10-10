@@ -2,17 +2,20 @@
     <div class="home">
         <sidebar :list="list" :fold="fold"></sidebar>
         <button @click="fold=!fold">切换</button>
-        <input-box v-model="value2" clearable ></input-box>
+        <!-- <input-box v-model="value2" clearable ></input-box> -->
+        <verification-code></verification-code>
     </div>
 </template>
 
 <script>
 import sidebar from "../components/sidebar/index.vue";
-import inputBox from "../components/input-box/index.vue"
+import inputBox from "../components/input-box/index.vue";
+import verificationCode from "../components/verification-code/index.vue";
 export default {
     components: {
         sidebar,
-        inputBox
+        inputBox,
+        verificationCode
     },
     data() {
         return {
