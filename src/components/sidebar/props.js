@@ -21,14 +21,14 @@ export default {
             default: "#cccccc"
         },
         // 选中颜色
-        active_col: {
+        activeColor: {
             type: String,
             default: "#ffffff"
         },
         // 选中背景
-        active_bg: {
+        activeBg: {
             type: String,
             default: "#333744"
-        }
+        },
     }
 }

@@ -25,7 +25,6 @@ export default {
             type: Number,
             default: null
         },
-
         // 图标
         icon: {
             type: String,
@@ -37,38 +36,22 @@ export default {
             default: false
         },
         // 显示密码
-        show_pw: {
+        showPw: {
             type: Boolean,
             default: false
         },
-
         // 过滤字符
-        filter_char: {
+        filterChar: {
             type: RegExp,
             default: null
         },
         // 替换字符
-        rep_val: {
+        repVal: {
             type: [String, Number],
             default: ""
         },
-
-        // 是否判断规则
-        judge: {
-            type: Boolean,
-            default: false
-        },
-        // 输入规则
-        rule: {
-            type: String,
-            default: ""
-        },
-        tips: {
-            type: String,
-            default: "输入有误"
-        },
         // 触发时间
-        trigge_time: {
+        triggeTime: {
             type: Number,
             default: 1000
         },

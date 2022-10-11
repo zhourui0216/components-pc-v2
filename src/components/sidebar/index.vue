@@ -31,13 +31,13 @@
         </div>
         <!-- 收起 -->
         <div class="stow" v-show="fold" @scroll="scroll">
-            <div class="item" :style="{background: active[0]===index ? active_bg : ''}" v-for="item,index in dataList" :key="index" @mouseenter="movein($event, index)" @mouseleave="remove(index)" @click="item.path ? jump(item.path) : ''">
+            <div class="item" :style="{background: active[0] === index ? activeBg : ''}" v-for="item,index in dataList" :key="index" @mouseenter="movein(index)" @mouseleave="remove()" @click="item.path ? jump(item.path) : ''">
                 <img class="icon" :src="item.icon" alt="">
 
                 <!-- 选项 -->
                 <transition name="scale" mode="out-in">
                     <div class="option" v-show="item.hover">
-                        <p :style="{color: active[1]===m && active[0]===index ? active_col : color, background: active[1]===m && active[0]===index ? active_bg : background}" v-for="n,m in item.children" :key="m" @mouseenter="submovein(index, m)" @mouseleave="subremove" @click="jump(n.path)">
+                        <p :style="{color: active[1] === m && active[0] === index ? activeColor : color, background: active[1] === m && active[0] === index ? activeBg : background}" v-for="n,m in item.children" :key="m" @mouseenter="submovein(index, m)" @mouseleave="subremove()" @click="jump(n.path)">
                             {{ n.name }}
                         </p>
                     </div>
@@ -53,9 +53,9 @@ export default {
     mixins: [props],
     data() {
         return {
-            dataList: [],
-            heightList: [],
-            active: [],
+            dataList: [], // 选项数据列表
+            heightList: [], // 选项高度列表
+            active: [], // 选中
         }
     },
     created() {
@@ -89,6 +89,7 @@ export default {
             let item = Array.from(document.querySelectorAll(".sidebar .open .item"));
             item.forEach((i, j) => {
                 let subitem = i.querySelector(".item .option .container");
+                // 有选项才获取高度
                 if (subitem) {
                     subitem.style.height = subitem.offsetHeight + "px";
                     this.heightList[j] = subitem.offsetHeight;
@@ -98,7 +99,10 @@ export default {
             })
             this.$forceUpdate();
         },
-        // 展开选项
+        /**
+         * 展开选项
+         * @param {number} index 打开索引
+         */
         openOption(index) {
             this.dataList[index].open = !this.dataList[index].open;
             this.$forceUpdate();
@@ -106,10 +110,15 @@ export default {
             let openState = JSON.stringify(this.dataList.map(i => i.open));
             sessionStorage.setItem("openState", openState);
         },
-        // 移入
-        movein(e, index) {
+        /**
+         * 移入
+         * @param {number} index 移入索引
+         * @returns {null} 退出
+         */
+        movein(index) {
             this.active = [index];
 
+            // 有跳转地址不显示选项
             if (this.dataList[index].path) {
                 return
             }
@@ -121,12 +130,15 @@ export default {
             this.dataList[index].hover = true;
             this.$forceUpdate();
 
-            if (e) {
-                let stow_scroll = document.querySelector(".stow").scrollTop;
-                this.setFixTop(stow_scroll);
-            }
+            let stow_scroll = document.querySelector(".stow").scrollTop;
+            this.setFixTop(stow_scroll);
         },
-        // 子项移入
+        /**
+         * 子项移入
+         * @param {number} index 选项移入索引
+         * @param {number} m 子选项移入索引
+         */
+        // 
         submovein(index, m) {
             this.active = [index, m];
             this.$forceUpdate();
@@ -137,31 +149,46 @@ export default {
             this.$forceUpdate();
         },
         // 移出
-        remove(index) {
+        remove() {
             this.active = [];
             this.dataList = this.dataList.map(i => {
                 i.hover = false;
                 return i;
             });
         },
-        // 滚动
+        /**
+         * 滚动
+         * @param {object} e 事件对象
+         * @returns {null} 退出
+         */
         scroll(e) {
+            // 有跳转地址退出
             if (this.dataList[this.active[0]].path) {
                 return
             }
             this.setFixTop(e.target.scrollTop);
         },
-        // 设置定位位置
+        /**
+         * 设置定位位置
+         * @param {number} scroll_top 滚动高度
+         */
         setFixTop(scroll_top) {
             let el_item = document.querySelectorAll(".stow .item")[this.active[0]];
             let el_option = el_item.querySelector(".option");
+            // 有选项设置定位
             if (el_option) {
                 el_option.style.top = el_item.offsetTop - scroll_top + "px";
                 el_option.style.left = el_item.offsetWidth + "px";
             }
         },
-        // 跳转
+        /**
+         * 跳转
+         * @param {string} url 跳转地址
+         * @returns {null} 退出
+         */
+        // 
         jump(url) {
+            // 判断重复跳转
             if (this.$route.path == url) {
                 console.log(this.$route.path)
                 return

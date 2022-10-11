@@ -3,7 +3,7 @@
         <sidebar :list="list" :fold="fold"></sidebar>
         <button @click="fold=!fold">切换</button>
         <!-- <input-box v-model="value2" clearable ></input-box> -->
-        <verification-code></verification-code>
+        <verification-code @change="b"></verification-code>
     </div>
 </template>
 
@@ -130,6 +130,14 @@ export default {
             }],
             fold: false,
             value2: 1,
+        }
+    },
+    methods: {
+        a(e){
+            console.log("将要" + e)
+        },
+        b(e){
+            console.log("外部接收" + e)
         }
     },
     watch: {

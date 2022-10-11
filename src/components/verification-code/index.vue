@@ -1,64 +1,16 @@
 <template>
-    <div class="code-canvas" :style="{width:contentWidth+'px',height:contentHeight+'px'}" @click="randomCode()">
-        <canvas id="code-canvas" :width="contentWidth" :height="contentHeight"></canvas>
+    <div class="verification-code" :style="{width: contentWidth + 'px',height: contentHeight + 'px'}" @click="takeChange()">
+        <canvas id="canvas" :width="contentWidth" :height="contentHeight"></canvas>
     </div>
 </template>
+
 <script>
+import props from "./props.js";
 export default {
-    props: {
-        fontSizeMin: {
-            type: Number,
-            default: 28
-        },
-        fontSizeMax: {
-            type: Number,
-            default: 40
-        },
-        backgroundColorMin: {
-            type: Number,
-            default: 180
-        },
-        backgroundColorMax: {
-            type: Number,
-            default: 240
-        },
-        colorMin: {
-            type: Number,
-            default: 50
-        },
-        colorMax: {
-            type: Number,
-            default: 160
-        },
-        lineColorMin: {
-            type: Number,
-            default: 40
-        },
-        lineColorMax: {
-            type: Number,
-            default: 180
-        },
-        dotColorMin: {
-            type: Number,
-            default: 0
-        },
-        dotColorMax: {
-            type: Number,
-            default: 255
-        },
-        contentWidth: {
-            type: Number,
-            default: 112
-        },
-        contentHeight: {
-            type: Number,
-            default: 40
-        }
-    },
+    mixins: [props],
     data() {
         return {
-            randomTerm: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"],
-            identifyCode: null
+            identifyCode: null, // 验证码
         }
     },
     mounted() {
@@ -67,27 +19,49 @@ export default {
     methods: {
         // 生成随机码
         randomCode() {
-            let code = ""
-            for (let i = 0; i < 4; i++) {
-                code += this.randomTerm[Math.floor(Math.random() * 36)]
+            if (this.code) {
+                this.identifyCode = this.code
+            } else {
+                this.identifyCode = ""
+                for (let i = 0; i < this.length; i++) {
+                    let random = Math.floor((Math.random() * 62))
+                    if (random <= 9) {
+                        this.identifyCode += random
+                    } else if (random <= 35) {
+                        this.identifyCode += String.fromCharCode(random - 10 + 65)
+                    } else if (random <= 61) {
+                        this.identifyCode += String.fromCharCode(random - 36 + 97)
+                    }
+                }
+                this.$emit("change", this.identifyCode)
             }
-            this.identifyCode = code
-            this.$emit("input", code)
+
             this.drawPic()
         },
-        // 生成一个随机数
+        /**
+         * 生成随机数
+         * @param {number} min 最小值
+         * @param {number} max 最大值
+         * @returns {number} 随机数
+         */
         randomNum(min, max) {
             return Math.floor(Math.random() * (max - min) + min)
         },
-        // 生成一个随机的颜色
+        /**
+         * 生成随机颜色
+         * @param {number} min 最小值
+         * @param {number} max 最大值
+         * @returns {string} 随机颜色
+         */
         randomColor(min, max) {
             var r = this.randomNum(min, max)
             var g = this.randomNum(min, max)
             var b = this.randomNum(min, max)
             return 'rgb(' + r + ',' + g + ',' + b + ')'
         },
+        // 绘制图片
         drawPic() {
-            var canvas = document.getElementById('code-canvas')
+            var canvas = document.getElementById('canvas')
             var ctx = canvas.getContext('2d')
             ctx.textBaseline = 'bottom'
             // 绘制背景
@@ -103,6 +77,12 @@ export default {
             this.drawLine(ctx)
             this.drawDot(ctx)
         },
+        /**
+         * 绘制文字
+         * @param {object} ctx canvas元素
+         * @param {string} txt 绘制的字符
+         * @param {number} i 字符索引
+         */
         drawText(ctx, txt, i) {
             ctx.fillStyle = this.randomColor(this.colorMin, this.colorMax)
             ctx.font = this.randomNum(this.fontSizeMin, this.fontSizeMax) + 'px SimHei'
@@ -118,8 +98,11 @@ export default {
             ctx.rotate(-deg * Math.PI / 270)
             ctx.translate(-x, -y)
         },
+        /**
+         * 绘制干扰线
+         * @param {object} ctx canvas元素
+         */
         drawLine(ctx) {
-            // 绘制干扰线
             for (let i = 0; i < 2; i++) {
                 ctx.strokeStyle = this.randomColor(
                     this.lineColorMin,
@@ -137,8 +120,11 @@ export default {
                 ctx.stroke()
             }
         },
+        /**
+         * 绘制干扰点
+         * @param {object} ctx canvas元素
+         */
         drawDot(ctx) {
-            // 绘制干扰点
             for (let i = 0; i < 20; i++) {
                 ctx.fillStyle = this.randomColor(0, 255)
                 ctx.beginPath()
@@ -152,15 +138,23 @@ export default {
                 ctx.fill()
             }
         },
+        // 将要改变
+        takeChange() {
+            if (this.code) {
+                this.$emit("takeChange")
+            } else {
+                this.randomCode()
+            }
+        }
     },
 }
 </script>
 
 <style lang="scss" scoped>
-.code-canvas {
+.verification-code {
     cursor: pointer;
 
-    #code-canvas {
+    #canvas {
         border-radius: 4px;
     }
 }

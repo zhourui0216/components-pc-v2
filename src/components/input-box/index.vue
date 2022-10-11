@@ -3,14 +3,14 @@
         <!-- 右侧图标 -->
         <img class="icon" :src="icon" v-if="icon">
 
-        <input :class="{active: active, padl: icon, padr: clearable || show_pw}" :type="visible?'text':'password'" :value="value" :placeholder="placeholder" :minlength="minlength" :maxlength="maxlength" @focus="changeState(true)" @input="entering" @change="change" @blur="changeState(false)">
+        <input :class="{active: active, left: icon, right: clearable || showPw}" :type="visible?'text':'password'" :value="value" :placeholder="placeholder" :minlength="minlength" :maxlength="maxlength" @focus="changeState(true)" @input="entering" @change="change" @blur="changeState(false)">
 
         <!-- 清除按钮 -->
-        <img src="./static/clear.png" v-show="clearable && !show_pw" @click="clear()">
+        <img src="./static/clear.png" v-show="clearable && !showPw" @click="clear()">
 
         <!-- 密码是否可见 -->
-        <img src="./static/hide_pw.png" @click="visible=!visible" v-show="show_pw && visible">
-        <img src="./static/show_pw.png" @click="visible=!visible" v-show="show_pw && !visible">
+        <img src="./static/hide_pw.png" @click="visible = !visible" v-show="showPw && visible">
+        <img src="./static/show_pw.png" @click="visible = !visible" v-show="showPw && !visible">
     </div>
 </template>
 
@@ -29,6 +29,7 @@ export default {
         }
     },
     created() {
+        // 判断输入内容长度
         if (this.type == "cardid") {
             this.minlength = 18;
             this.maxlength = 18;
@@ -43,14 +44,23 @@ export default {
         this.preval = this.value;
     },
     methods: {
-        // 改变状态
+        /**
+         * 改变状态
+         * 根据是否获取焦点显示边框颜色
+         * @param {boolean} val 是否获取焦点
+         */
         changeState(val) {
             this.active = val;
         },
-        // 输入触发
+        /**
+         * 输入触发
+         * 根据条件处理后返回
+         * @param {object} e 事件对象
+         */
         entering(e) {
             let value = e.target.value;
 
+            // 根据类型过滤内容
             if (this.type == "number") {
                 value = parseInt(value.replace(/[^0-9]+/, ""));
             } else if (this.type == "decimal") {
@@ -62,15 +72,15 @@ export default {
             } else if (this.type == "cardid") {
                 value = value.replace(/[^0-9X]+/, "");
             } else if (this.type == "tel") {
-                // 是否1开头
+                // 输入电话是否1开头
                 if (/^(?!1)\d+/g.test(value)) {
                     value = "";
                 } else {
                     value = value.replace(/[^0-9]+/, "");
                 }
-            } else if (this.filter_char) {
+            } else if (this.filterChar) {
                 // 未指定类型时可根据传入条件替换传入值
-                value = value.replace(this.filter_char, this.rep_val);
+                value = value.replace(this.filterChar, this.repVal);
             }
 
             this.$emit("input", value);
@@ -79,13 +89,19 @@ export default {
             // 输入计时触发
             clearTimeout(this.timer);
             this.timer = setTimeout(data => {
+                // 有值并发生改变才会触发
                 if (value.length && value != this.preval) {
                     this.preval = value;
                     this.$emit("search", value);
                 }
-            }, this.trigge_time)
+            }, this.triggeTime)
         },
-        // 改变触发
+        /**
+         * 失去焦点后值发生改变触发
+         * 根据条件处理后返回
+         * @param {object} e 事件对象
+         */
+        // 触发
         change(e) {
             let value = e.target.value;
             // 处理小数时数据类型
@@ -111,6 +127,11 @@ export default {
     width: 100%;
     flex: 1;
     position: relative;
+
+    .icon {
+        left: 6px;
+        cursor: default;
+    }
 
     input {
         width: 100%;
@@ -142,19 +163,14 @@ export default {
         }
     }
 
-    .padl {
+    .left {
         box-sizing: border-box;
         padding-left: 30px;
     }
 
-    .padr {
+    .right {
         box-sizing: border-box;
         padding-right: 30px !important;
-    }
-
-    .icon {
-        left: 6px;
-        cursor: default;
     }
 
     img {
