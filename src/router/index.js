@@ -5,15 +5,15 @@ import HomeView from '../views/home.vue'
 Vue.use(VueRouter)
 
 const routes = [
-  {
-    path: '/',
-    name: 'home',
-    component: HomeView
-  },
+    {
+        path: '/',
+        name: 'home',
+        component: HomeView
+    },
 ]
 
 const router = new VueRouter({
-  routes
+    routes
 })
 
 export default router
