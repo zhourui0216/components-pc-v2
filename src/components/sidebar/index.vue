@@ -113,7 +113,7 @@ export default {
         /**
          * 移入
          * @param {number} index 移入索引
-         * @returns {null} 退出
+         * @returns 退出
          */
         movein(index) {
             this.active = [index];
@@ -159,7 +159,7 @@ export default {
         /**
          * 滚动
          * @param {object} e 事件对象
-         * @returns {null} 退出
+         * @returns 退出
          */
         scroll(e) {
             // 有跳转地址退出
@@ -184,7 +184,7 @@ export default {
         /**
          * 跳转
          * @param {string} url 跳转地址
-         * @returns {null} 退出
+         * @returns 退出
          */
         // 
         jump(url) {
