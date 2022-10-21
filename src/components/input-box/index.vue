@@ -3,7 +3,7 @@
         <!-- 右侧图标 -->
         <img class="icon" :src="icon" v-if="icon">
 
-        <input :class="{active: active, left: icon, right: clearable || showPw}" :type="visible?'text':'password'" :value="value" :placeholder="placeholder" :minlength="minlength" :maxlength="maxlength" @focus="changeState(true)" @input="entering" @change="change" @blur="changeState(false)">
+        <input :class="{active: active, left: icon, right: clearable || showPw}" :type="showPw && visible ? 'password' : 'text'" :value="value" :placeholder="placeholder" :minlength="minlength" :maxlength="maxlength" @focus="changeState(true)" @input="entering" @change="change" @blur="changeState(false)">
 
         <!-- 清除按钮 -->
         <img src="./static/clear.png" v-show="clearable && !showPw" @click="clear()">
@@ -80,7 +80,7 @@ export default {
                 }
             } else if (this.filterChar) {
                 // 未指定类型时可根据传入条件替换传入值
-                value = value.replace(this.filterChar, this.repVal);
+                value = value.replace(this.filterChar, this.repVal || "");
             }
 
             this.$emit("input", value);
