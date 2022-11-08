@@ -13,7 +13,22 @@ const routes = [
     {
         path: '/use-sidebar',
         name: 'use-sidebar',
-        component: ()=>import("../views/pages/use-sidebar.vue")
+        component: () => import("../views/pages/use-sidebar.vue")
+    },
+    {
+        path: '/use-input-box',
+        name: 'use-input-box',
+        component: () => import("../views/pages/use-input-box.vue")
+    },
+    {
+        path: '/use-verification-code',
+        name: 'use-verification-code',
+        component: () => import("../views/pages/use-verification-code.vue")
+    },
+    {
+        path: '/use-switch-button',
+        name: 'use-switch-button',
+        component: () => import("../views/pages/use-switch-button.vue")
     }
 ]
 
