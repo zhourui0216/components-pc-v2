@@ -1,6 +1,7 @@
 <template>
-	<div class="switch-button" :style="{width: width + 'px', height: height + 'px', background: value ? active : color, borderRadius: (width / 2) + 'px', '--borderSize': borderSize + 'px', '--bc': value ? ba : bc}" @click="twoway ? change() : willChange()">
-		<div :class="{spot: true, open: value, shut: !value}" :style="{'--height': height + 'px', '--pointSize': pointSize + 'px', background: value ? pointActive : pointColor}"></div>
+	<div class="switch-button" :style="{'--width': width + 'px', '--height': height + 'px'}" @click="twoway ? change() : willChange()">
+		<div class="box" :style="{background: value ? active : color, '--borderSize': borderSize + 'px', '--borcol': value ? boract : borcol}"></div>
+		<div :class="{spot: true, open: value, shut: !value}" :style="{'--pointSize': pointSize + 'px', background: value ? pointActive : pointColor}"></div>
 	</div>
 </template>
 
@@ -10,23 +11,21 @@ export default {
 	mixins: [props],
 	data() {
 		return {
-			bc: null, // borderColor
-			ba: null, // borderActive
+			borcol: null, // borderColor
+			boract: null, // borderActive
 		}
 	},
 	created() {
-		this.bc = this.borderColor || this.color;
-		this.ba = this.borderActive || this.active;
+		this.borcol = this.borderColor || this.color;
+		this.boract = this.borderActive || this.active;
 	},
 	methods: {
 		// 将要改变
 		willChange() {
-			console.log("将要改变")
 			this.$emit("willChange", !this.value);
 		},
 		// 改变
 		change() {
-			console.log("改变")
 			this.$emit("input", !this.value);
 		}
 	}
@@ -35,30 +34,42 @@ export default {
 
 <style scoped lang="scss">
 .switch-button {
-	border: var(--borderSize) solid var(--bc);
-	transition: all 0.4s;
-	box-sizing: border-box;
+	width: var(--width);
+	height: var(--height);
 	position: relative;
 	cursor: pointer;
+
+	.box {
+		width: 100%;
+		height: 100%;
+		border-radius: calc(var(--width) / 2);
+		border: var(--borderSize) solid var(--borcol);
+		box-sizing: border-box;
+		transition: all 0.4s;
+		position: absolute;
+		z-index: 1;
+	}
 
 	.spot {
 		width: var(--pointSize);
 		height: var(--pointSize);
 		border-radius: 50%;
-		transform: translateY(-50%);
 		transition: all 0.4s;
 		position: absolute;
-		top: 50%;
+		z-index: 2;
 	}
 
 	$pointX: calc((var(--height) - var(--pointSize)) / 2);
 
 	.open {
-		left: calc(100% - var(--pointSize) - $pointX + var(--borderSize));
+		transform: translate(
+			calc(var(--width) - var(--pointSize) - $pointX),
+			$pointX
+		);
 	}
 
 	.shut {
-		left: calc($pointX - var(--borderSize));
+		transform: translate($pointX, $pointX);
 	}
 }
 </style>
