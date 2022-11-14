@@ -29,6 +29,11 @@ const routes = [
         path: '/use-switch-button',
         name: 'use-switch-button',
         component: () => import("../views/pages/use-switch-button.vue")
+    },
+    {
+        path: '/use-radio',
+        name: 'use-radio',
+        component: () => import("../views/pages/use-radio.vue")
     }
 ]
 

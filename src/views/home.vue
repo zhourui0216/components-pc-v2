@@ -4,6 +4,7 @@
         <div @click="go('/use-input-box')">输入框</div>
         <div @click="go('/use-verification-code')">验证码</div>
         <div @click="go('/use-switch-button')">切换按钮</div>
+        <div @click="go('/use-radio')">勾选</div>
 	</div>
 </template>
 
