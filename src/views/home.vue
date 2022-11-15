@@ -1,10 +1,10 @@
 <template>
 	<div class="home">
-        <div @click="go('/use-sidebar')">侧边栏</div>
-        <div @click="go('/use-input-box')">输入框</div>
-        <div @click="go('/use-verification-code')">验证码</div>
-        <div @click="go('/use-switch-button')">切换按钮</div>
-        <div @click="go('/use-radio')">勾选</div>
+		<div @click="go('/use-sidebar')">侧边栏</div>
+		<div @click="go('/use-input-box')">输入框</div>
+		<div @click="go('/use-verification-code')">验证码</div>
+		<div @click="go('/use-switch-button')">切换按钮</div>
+		<div @click="go('/use-radio')">单选</div>
 	</div>
 </template>
 
@@ -12,7 +12,7 @@
 export default {
 	data() {
 		return {
-			
+
 		}
 	},
 	methods: {
@@ -22,9 +22,9 @@ export default {
 		b(e) {
 			console.log("外部接收" + e)
 		},
-        go(path) {
-            this.$router.push({path});
-        }
+		go(path) {
+			this.$router.push({ path });
+		}
 	},
 	watch: {
 		value2(v) {
@@ -41,8 +41,8 @@ export default {
 	width: 100%;
 	height: 100%;
 
-    div {
-        cursor: pointer;
-    }
+	div {
+		cursor: pointer;
+	}
 }
 </style>

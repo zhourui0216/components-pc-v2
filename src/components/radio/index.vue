@@ -1,10 +1,9 @@
 <template>
-	<div class="radio" @click="check()">
-		<img :src="value == label ? radio2 : radio1" alt="">
-		<!-- <input type="radio" name="s" :value="label" ref="redio" :checked="value == label"> -->
-		<label>
+	<div class="radio">
+		<img :src="value == label ? radio1 : radio2" @click="check()">
+		<p @click="check()">
 			<slot></slot>
-		</label>
+		</p>
 	</div>
 </template>
 
@@ -18,14 +17,9 @@ export default {
 			radio2: require("./static/radio2.png"),
 		}
 	},
-	created() {
-		console.log();
-	},
 	methods: {
 		check() {
-			console.log()
-			// this.$refs.redio.click()
-			this.$emit("input", this.label)
+			this.$emit("input", this.label);
 		}
 	}
 }
@@ -33,21 +27,23 @@ export default {
 
 <style scoped lang="scss">
 .radio {
-    user-select: none;
+	width: auto;
+	min-width: 60px;
+	height: auto;
 	display: flex;
-    align-items: center;
-	margin: 0 10px;
-    cursor: pointer;
+	align-items: center;
+	user-select: none;
 
-    img {
-        width: 15px;
-        height: 15px;
-        margin-right: 5px;
-    }
+	img {
+		width: 14px;
+		height: 14px;
+		margin-right: 10px;
+		cursor: pointer;
+	}
 
-	label {
+	p {
 		font-size: 14px;
-        cursor: pointer;
+		cursor: pointer;
 	}
 }
 </style>

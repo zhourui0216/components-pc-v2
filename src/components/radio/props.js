@@ -1,11 +1,11 @@
 export default {
     props: {
+        // 值
         value: {
-            type: String|Number|Boolean,
             required: true
         },
+        // 选项绑定的值
         label: {
-            type: String|Number,
             required: true
         }
     }
