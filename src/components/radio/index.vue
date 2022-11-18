@@ -1,5 +1,5 @@
 <template>
-	<div class="radio">
+	<div :class="{radio: true, readonly: readonly}">
 		<img :src="value == label ? radio1 : radio2" @click="check()">
 		<p @click="check()">
 			<slot></slot>
@@ -19,6 +19,9 @@ export default {
 	},
 	methods: {
 		check() {
+			if (this.readonly) {
+				return;
+			}
 			this.$emit("input", this.label);
 		}
 	}
@@ -44,6 +47,13 @@ export default {
 	p {
 		font-size: 14px;
 		cursor: pointer;
+	}
+}
+
+.readonly {
+	img,
+	p {
+		cursor: default;
 	}
 }
 </style>

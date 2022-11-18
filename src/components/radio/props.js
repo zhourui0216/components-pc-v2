@@ -7,6 +7,11 @@ export default {
         // 选项绑定的值
         label: {
             required: true
+        },
+        // 只读
+        readonly: {
+            type: Boolean,
+            default: false
         }
     }
 }
