@@ -1,5 +1,5 @@
 <template>
-	<div class="switch-button" :style="{'--width': width + 'px', '--height': height + 'px'}" @click="twoway ? change() : willChange()">
+	<div :class="{'switch-button': true, readonly: readonly}" :style="{'--width': width + 'px', '--height': height + 'px'}" @click="twoway && !readonly ? change() : willChange()">
 		<div class="box" :style="{background: value ? active : color, '--borderSize': borderSize + 'px', '--borcol': value ? boract : borcol}"></div>
 		<div :class="{spot: true, open: value, shut: !value}" :style="{'--pointSize': pointSize + 'px', background: value ? pointActive : pointColor}"></div>
 	</div>
@@ -71,5 +71,9 @@ export default {
 	.shut {
 		transform: translate($pointX, $pointX);
 	}
+}
+
+.readonly {
+	cursor: default;
 }
 </style>

@@ -59,6 +59,11 @@ export default {
         pointActive: {
             type: String,
             default: "#fff"
+        },
+        // 只读
+        readonly: {
+            type: Boolean,
+            default: false
         }
     }
 }
