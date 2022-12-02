@@ -34,6 +34,11 @@ const routes = [
         path: '/use-radio',
         name: 'use-radio',
         component: () => import("../views/pages/use-radio.vue")
+    },
+    {
+        path: '/use-ad-typesetting',
+        name: 'use-ad-typesetting',
+        component: () => import("../views/pages/use-ad-typesetting.vue")
     }
 ]
 

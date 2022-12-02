@@ -5,6 +5,7 @@
 		<div @click="go('/use-verification-code')">验证码</div>
 		<div @click="go('/use-switch-button')">切换按钮</div>
 		<div @click="go('/use-radio')">单选</div>
+        <div @click="go('/use-ad-typesetting')">广告排版</div>
 	</div>
 </template>
 
@@ -16,20 +17,8 @@ export default {
 		}
 	},
 	methods: {
-		a(e) {
-			console.log("将要" + e)
-		},
-		b(e) {
-			console.log("外部接收" + e)
-		},
 		go(path) {
 			this.$router.push({ path });
-		}
-	},
-	watch: {
-		value2(v) {
-			console.log("改变：" + v + "," + typeof v)
-			return v
 		}
 	}
 }
