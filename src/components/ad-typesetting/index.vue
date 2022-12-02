@@ -161,6 +161,9 @@ export default {
 			console.log("点击");
 			this.targetIndex = null;
 		}
+		window.onkeydown = e => {
+			console.log(e);
+		}
 	},
 	methods: {
 		// 导入类型
@@ -265,6 +268,10 @@ export default {
 			this.pressX = e.screenX;
 			this.pressY = e.screenY;
 
+			this.startX = parseInt(this.dataList[this.targetIndex].style.left);
+			this.startY = parseInt(this.dataList[this.targetIndex].style.top);
+			console.log(this.startX, this.startY);
+
 			this.startW = parseInt(this.dataList[this.targetIndex].style.width);
 			this.startH = parseInt(this.dataList[this.targetIndex].style.height);
 			this.iszoom = true;
@@ -277,42 +284,92 @@ export default {
 			this[this.direction](screenX, screenY);
 		},
 		// 缩放-左上
-		lt() {
+		lt(screenX, screenY) {
 			console.log("左上")
+			this.lc(screenX, screenY);
+			this.tc(screenX, screenY);
 		},
 		// 缩放-上
-		tc() {
+		tc(screenX, screenY) {
 			console.log("上")
+			let deviation = (screenY - this.pressY) / window.devicePixelRatio;
+			let y = -deviation + this.startH;
+
+			if (deviation + this.startY < 0) {
+				this.dataList[this.targetIndex].style.top = 0 + "px";
+				this.dataList[this.targetIndex].style.height = this.startY + this.startH + "px";
+			} else if (y < 10) {
+				this.dataList[this.targetIndex].style.top = (this.startY + this.startH - 10) + "px";
+				this.dataList[this.targetIndex].style.height = "10px";
+			} else {
+				this.dataList[this.targetIndex].style.top = this.startY + deviation + "px";
+				this.dataList[this.targetIndex].style.height = y + "px";
+			}
 		},
 		// 缩放-右上
-		rt() {
+		rt(screenX, screenY) {
 			console.log("右上")
+			this.rc(screenX, screenY);
+			this.tc(screenX, screenY);
 		},
 		// 缩放-右
-		rc() {
+		rc(screenX, screenY) {
 			console.log("右")
-            console.log(this.direction)
+			console.log(this.direction)
 			console.log(screenX - this.pressX, screenY - this.pressY)
+
 			let x = (screenX - this.pressX) / window.devicePixelRatio + this.startW;
-			let y = (screenY - this.pressY) / window.devicePixelRatio + this.startH;
-			console.log(x, y)
-			this.dataList[this.targetIndex].style.width = x + "px";
+			// let y = (screenY - this.pressY) / window.devicePixelRatio + this.startH;
+
+			if (x < 10) {
+				this.dataList[this.targetIndex].style.width = "10px";
+			} else if (x + this.startX > this.canvasWidth) {
+				this.dataList[this.targetIndex].style.width = this.canvasWidth - this.startX + "px";
+			} else {
+				this.dataList[this.targetIndex].style.width = x + "px";
+			}
 		},
 		// 缩放-右下
-		rb() {
-			console.log("右下")
+		rb(screenX, screenY) {
+			console.log("右下");
+			this.rc(screenX, screenY);
+			this.bc(screenX, screenY);
 		},
 		// 缩放-下
-		bc() {
+		bc(screenX, screenY) {
 			console.log("下")
+			// let x = (screenX - this.pressX) / window.devicePixelRatio + this.startW;
+			let y = (screenY - this.pressY) / window.devicePixelRatio + this.startH;
+
+			if (y < 10) {
+				this.dataList[this.targetIndex].style.height = "10px";
+			} else if (y + this.startY > this.canvasHeight) {
+				this.dataList[this.targetIndex].style.height = this.canvasHeight - this.startY + "px";
+			} else {
+				this.dataList[this.targetIndex].style.height = y + "px";
+			}
 		},
 		// 缩放-左下
-		lb() {
+		lb(screenX, screenY) {
 			console.log("左下")
+			this.lc(screenX, screenY);
+			this.bc(screenX, screenY);
 		},
 		// 缩放-左
-		lc() {
-			console.log("左")
+		lc(screenX, screenY) {
+			let deviation = (screenX - this.pressX) / window.devicePixelRatio;
+			let x = -deviation + this.startW;
+
+			if (deviation + this.startX < 0) {
+				this.dataList[this.targetIndex].style.left = 0 + "px";
+				this.dataList[this.targetIndex].style.width = this.startX + this.startW + "px";
+			} else if (x < 10) {
+				this.dataList[this.targetIndex].style.left = (this.startX + this.startW - 10) + "px";
+				this.dataList[this.targetIndex].style.width = "10px";
+			} else {
+				this.dataList[this.targetIndex].style.left = this.startX + deviation + "px";
+				this.dataList[this.targetIndex].style.width = x + "px";
+			}
 		},
 		// 选项置顶
 		optionTop(index) {
