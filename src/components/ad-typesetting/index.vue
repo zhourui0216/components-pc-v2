@@ -23,6 +23,7 @@
 			<div class="canvas" ref="canvas" :style="{width: canvasWidth + 'px', height: canvasHeight + 'px', background: canvasBackground}">
 				<div :class="{item: true, movable: targetIndex === index, notOptional: targetIndex !== index && ismove}" :ref="'item' + index" :style="item.style" v-for="item,index in dataList" :key="item.id" @mousedown="pressItem($event, index)" @contextmenu.prevent="rightClick($event, index)">
 					<img :src="item.url" alt="" v-if="item.type == 'img'">
+					<video :src="item.url" autoplay muted loop v-if="item.type == 'video'"></video>
 
 					<div class="border" v-if="targetIndex === index">
 						<div class="lt" :ref="'lt' + index" @mousedown.stop="readyZoom($event, 'lt')"></div>
@@ -153,7 +154,7 @@ export default {
 				{
 					type: "video",
 					name: "",
-					url: "",
+					url: "https://prod-streaming-video-msn-com.akamaized.net/fe13f13c-c2cc-4998-b525-038b23bfa9b5/1a9d30ca-54be-411e-8b09-d72ef4488e05.mp4",
 					style: {
 						width: "60px",
 						height: "60px",
@@ -172,6 +173,9 @@ export default {
 		}
 
 		window.onkeydown = e => {
+			if (this.targetIndex === null) {
+				return
+			}
 			if (e.keyCode == 37) {
 				this.directionmove(-1, 0);
 			} else if (e.keyCode == 38) {
@@ -566,9 +570,11 @@ export default {
 			.item {
 				position: absolute;
 
-				img {
+				img,
+				video {
 					width: 100%;
 					height: 100%;
+					object-fit: fill;
 					position: absolute;
 					top: 0;
 					left: 0;
