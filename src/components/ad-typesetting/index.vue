@@ -19,9 +19,9 @@
 				</div>
 			</div>
 		</div>
-		<div class="core" @click.stop>
+		<div class="core">
 			<div class="canvas" ref="canvas" :style="{width: canvasWidth + 'px', height: canvasHeight + 'px', background: canvasBackground}">
-				<div :class="{item: true, movable: targetIndex === index, notOptional: targetIndex !== index && ismove}" :ref="'item' + index" :style="item.style" v-for="item,index in dataList" :key="item.id" @mousedown="pressItem($event, index)" @mouseup="leaveItem">
+				<div :class="{item: true, movable: targetIndex === index, notOptional: targetIndex !== index && ismove}" :ref="'item' + index" :style="item.style" v-for="item,index in dataList" :key="item.id" @mousedown="pressItem($event, index)" @contextmenu.prevent="rightClick($event, index)">
 					<img :src="item.url" alt="" v-if="item.type == 'img'">
 
 					<div class="border" v-if="targetIndex === index">
@@ -35,6 +35,14 @@
 						<div class="rb" :ref="'rb' + index" @mousedown.stop="readyZoom($event, 'rb')"></div>
 					</div>
 				</div>
+			</div>
+			<div class="menu" ref="menu" v-show="showMenu" @mousedown.stop>
+				<p @click="check()">选中</p>
+				<p @click="uncheck()">取消选中</p>
+				<p @click="uponeLevel(setIndex)">向上一级</p>
+				<p @click="downoneLevel(setIndex)">向下一级</p>
+				<p @click="optionTop(setIndex)">置顶</p>
+				<p @click="optionBottom(setIndex)">置底</p>
 			</div>
 		</div>
 		<div class="info">
@@ -86,26 +94,51 @@ export default {
 	mixins: [props],
 	data() {
 		return {
-			canvasWidth: 500, // 画布宽度
-			canvasHeight: 500, // 画布高度
+			canvasWidth: 360, // 画布宽度
+			canvasHeight: 640, // 画布高度
 			canvasBackground: "#ffffff", // 画布背景
+			targetIndex: null, // 目标索引
+			setIndex: null, // 设置目标索引
+			pressX: 0, // 按下X轴位置
+			pressY: 0, // 按下Y轴位置
+			startX: 0, // 开始X轴位置
+			startY: 0, // 开始Y轴位置
+			startW: 0, // 开始宽度
+			startH: 0, // 开始高度
+			ismove: false, // 是否移动
+			iszoom: false, // 是否缩放
+			showMenu: false, // 显示菜单
+			direction: null, // 方向
 			// 数据列表
 			dataList: [
 				{
-					type: null,
+					type: "img",
 					name: "",
-					url: "",
+					url: "https://tse3-mm.cn.bing.net/th/id/OIP-C.6Abq-Mposjlq7sZxu4eVEAHaEo?w=280&h=180&c=7&r=0&o=5&pid=1.7",
 					style: {
 						width: "60px",
 						height: "60px",
 						background: "#ccc",
-						zIndex: 0,
+						zIndex: 3,
 						top: 0,
 						left: 0,
 					}
 				},
 				{
 					type: "img",
+					name: "",
+					url: "https://tse1-mm.cn.bing.net/th/id/OIP-C.wc_dCG_KbIKZwMdtD3gL2QHaEt?w=288&h=183&c=7&r=0&o=5&pid=1.7",
+					style: {
+						width: "60px",
+						height: "60px",
+						background: "#ccc",
+						zIndex: 2,
+						top: 0,
+						left: 0,
+					}
+				},
+				{
+					type: null,
 					name: "",
 					url: "",
 					style: {
@@ -125,44 +158,29 @@ export default {
 						width: "60px",
 						height: "60px",
 						background: "#ccc",
-						zIndex: 2,
-						top: 0,
-						left: 0,
-					}
-				},
-				{
-					type: "audio",
-					name: "",
-					url: "",
-					style: {
-						width: "60px",
-						height: "60px",
-						background: "#ccc",
-						zIndex: 3,
+						zIndex: 0,
 						top: 0,
 						left: 0,
 					}
 				}
 			],
-			targetIndex: null, // 目标索引
-			pressX: 0, // 按下X轴位置
-			pressY: 0, // 按下Y轴位置
-			startX: 0, // 开始X轴位置
-			startY: 0, // 开始Y轴位置
-			ismove: false, // 是否移动
-			startW: 0, // 开始宽度
-			startH: 0, // 开始高度
-			iszoom: false, // 是否缩放
-			direction: null, // 方向
 		}
 	},
 	created() {
-		window.onclick = () => {
-			console.log("点击");
-			this.targetIndex = null;
+		window.onmousedown = e => {
+			this.showMenu = false;
 		}
+
 		window.onkeydown = e => {
-			console.log(e);
+			if (e.keyCode == 37) {
+				console.log("左");
+			} else if (e.keyCode == 38) {
+				console.log("上");
+			} else if (e.keyCode == 39) {
+				console.log("右");
+			} else if (e.keyCode == 40) {
+				console.log("下");
+			}
 		}
 	},
 	methods: {
@@ -206,55 +224,62 @@ export default {
 		// 确定
 		determine() {
 			console.log("确定");
-			console.log(this.randomColor());
 		},
-
 		// 点击项
 		pressItem(e, index) {
+			if (e.button !== 0) {
+				return
+			}
 			this.targetIndex = index;
 			this.ismove = true;
 			this.optionTop(index);
 
 			this.pressX = e.screenX;
 			this.pressY = e.screenY;
-			let el = this.$refs["item" + index][0];
-			this.startX = el.offsetLeft;
-			this.startY = el.offsetTop;
-			this.startW = parseInt(this.dataList[this.targetIndex].style.width);
-			this.startH = parseInt(this.dataList[this.targetIndex].style.height);
+
+			this.startX = this.getStyle("left", true);
+			this.startY = this.getStyle("top", true);
+
+			this.startW = this.getStyle("width", true);
+			this.startH = this.getStyle("height", true);
+		},
+		// 右键
+		rightClick(e, index) {
+			this.$refs.menu.style.top = e.y + "px";
+			this.$refs.menu.style.left = e.x + "px";
+			this.showMenu = true;
+			this.setIndex = index;
 		},
 		// 移动
 		move(e) {
+			// 移动
 			if (this.ismove) {
 				this.moveItem(e.screenX, e.screenY);
-				console.log("移动");
 			}
+			// 缩放
 			if (this.iszoom) {
-				console.log("缩放");
-				this.startZoom(e.screenX, e.screenY);
+				this[this.direction](e.screenX, e.screenY);
 			}
 		},
 		// 移动项
 		moveItem(screenX, screenY) {
-			let el = this.$refs["item" + this.targetIndex][0];
-
 			let x = (screenX - this.pressX) / window.devicePixelRatio + this.startX;
 			let y = (screenY - this.pressY) / window.devicePixelRatio + this.startY;
-			console.log(x, y)
+
 			if (x < 0) {
-				this.dataList[this.targetIndex].style.left = 0 + "px";
+				this.setStyle("left", 0);
 			} else if (x + this.startW > this.canvasWidth) {
-				this.dataList[this.targetIndex].style.left = this.canvasWidth - this.startW + "px";
+				this.setStyle("left", this.canvasWidth - this.startW + "px");
 			} else {
-				this.dataList[this.targetIndex].style.left = x + "px";
+				this.setStyle("left", x + "px");
 			}
 
 			if (y < 0) {
-				this.dataList[this.targetIndex].style.top = 0 + "px";
+				this.setStyle("top", 0);
 			} else if (y + this.startH > this.canvasHeight) {
-				this.dataList[this.targetIndex].style.top = this.canvasHeight - this.startH + "px";
+				this.setStyle("top", this.canvasHeight - this.startH + "px");
 			} else {
-				this.dataList[this.targetIndex].style.top = y + "px";
+				this.setStyle("top", y + "px");
 			}
 		},
 		// 离开项
@@ -264,94 +289,77 @@ export default {
 		},
 		// 准备缩放
 		readyZoom(e, direction) {
-			console.log("缩放", this.targetIndex);
+			if (e.button !== 0) {
+				return
+			}
 			this.pressX = e.screenX;
 			this.pressY = e.screenY;
 
-			this.startX = parseInt(this.dataList[this.targetIndex].style.left);
-			this.startY = parseInt(this.dataList[this.targetIndex].style.top);
-			console.log(this.startX, this.startY);
+			this.startX = this.getStyle("left", true);
+			this.startY = this.getStyle("top", true);
 
-			this.startW = parseInt(this.dataList[this.targetIndex].style.width);
-			this.startH = parseInt(this.dataList[this.targetIndex].style.height);
+			this.startW = this.getStyle("width", true);
+			this.startH = this.getStyle("height", true);
 			this.iszoom = true;
 			this.direction = direction;
-
-			console.log(this.startW, this.startH);
-		},
-		// 开始缩放
-		startZoom(screenX, screenY) {
-			this[this.direction](screenX, screenY);
 		},
 		// 缩放-左上
 		lt(screenX, screenY) {
-			console.log("左上")
 			this.lc(screenX, screenY);
 			this.tc(screenX, screenY);
 		},
 		// 缩放-上
 		tc(screenX, screenY) {
-			console.log("上")
 			let deviation = (screenY - this.pressY) / window.devicePixelRatio;
 			let y = -deviation + this.startH;
 
 			if (deviation + this.startY < 0) {
-				this.dataList[this.targetIndex].style.top = 0 + "px";
-				this.dataList[this.targetIndex].style.height = this.startY + this.startH + "px";
+				this.setStyle("top", 0);
+				this.setStyle("height", this.startY + this.startH + "px");
 			} else if (y < 10) {
-				this.dataList[this.targetIndex].style.top = (this.startY + this.startH - 10) + "px";
-				this.dataList[this.targetIndex].style.height = "10px";
+				this.setStyle("top", (this.startY + this.startH - 10) + "px");
+				this.setStyle("height", "10px");
 			} else {
-				this.dataList[this.targetIndex].style.top = this.startY + deviation + "px";
-				this.dataList[this.targetIndex].style.height = y + "px";
+				this.setStyle("top", this.startY + deviation + "px");
+				this.setStyle("height", y + "px");
 			}
 		},
 		// 缩放-右上
 		rt(screenX, screenY) {
-			console.log("右上")
 			this.rc(screenX, screenY);
 			this.tc(screenX, screenY);
 		},
 		// 缩放-右
 		rc(screenX, screenY) {
-			console.log("右")
-			console.log(this.direction)
-			console.log(screenX - this.pressX, screenY - this.pressY)
-
 			let x = (screenX - this.pressX) / window.devicePixelRatio + this.startW;
-			// let y = (screenY - this.pressY) / window.devicePixelRatio + this.startH;
 
 			if (x < 10) {
-				this.dataList[this.targetIndex].style.width = "10px";
+				this.setStyle("width", "10px");
 			} else if (x + this.startX > this.canvasWidth) {
-				this.dataList[this.targetIndex].style.width = this.canvasWidth - this.startX + "px";
+				this.setStyle("width", this.canvasWidth - this.startX + "px");
 			} else {
-				this.dataList[this.targetIndex].style.width = x + "px";
+				this.setStyle("width", x + "px");
 			}
 		},
 		// 缩放-右下
 		rb(screenX, screenY) {
-			console.log("右下");
 			this.rc(screenX, screenY);
 			this.bc(screenX, screenY);
 		},
 		// 缩放-下
 		bc(screenX, screenY) {
-			console.log("下")
-			// let x = (screenX - this.pressX) / window.devicePixelRatio + this.startW;
 			let y = (screenY - this.pressY) / window.devicePixelRatio + this.startH;
 
 			if (y < 10) {
-				this.dataList[this.targetIndex].style.height = "10px";
+				this.setStyle("height", "10px");
 			} else if (y + this.startY > this.canvasHeight) {
-				this.dataList[this.targetIndex].style.height = this.canvasHeight - this.startY + "px";
+				this.setStyle("height", this.canvasHeight - this.startY + "px");
 			} else {
-				this.dataList[this.targetIndex].style.height = y + "px";
+				this.setStyle("height", y + "px");
 			}
 		},
 		// 缩放-左下
 		lb(screenX, screenY) {
-			console.log("左下")
 			this.lc(screenX, screenY);
 			this.bc(screenX, screenY);
 		},
@@ -361,28 +369,96 @@ export default {
 			let x = -deviation + this.startW;
 
 			if (deviation + this.startX < 0) {
-				this.dataList[this.targetIndex].style.left = 0 + "px";
-				this.dataList[this.targetIndex].style.width = this.startX + this.startW + "px";
+				this.setStyle("left", 0);
+				this.setStyle("width", this.startX + this.startW + "px");
 			} else if (x < 10) {
-				this.dataList[this.targetIndex].style.left = (this.startX + this.startW - 10) + "px";
-				this.dataList[this.targetIndex].style.width = "10px";
+				this.setStyle("left", (this.startX + this.startW - 10) + "px");
+				this.setStyle("width", "10px");
 			} else {
-				this.dataList[this.targetIndex].style.left = this.startX + deviation + "px";
-				this.dataList[this.targetIndex].style.width = x + "px";
+				this.setStyle("left", this.startX + deviation + "px");
+				this.setStyle("width", x + "px");
 			}
+		},
+		// 向上一级
+		uponeLevel(index) {
+			let arr = this.dataList.map(i => i.style.zIndex);
+			let max = Math.max(...arr);
+			let current = this.dataList[index].style.zIndex;
+			if (current < max) {
+				this.dataList.forEach(i => {
+					if (i.style.zIndex == current + 1) {
+						i.style.zIndex--;
+					}
+					return i;
+				})
+				this.dataList[index].style.zIndex++;
+			}
+			this.showMenu = false;
+		},
+		// 向下一级
+		downoneLevel(index) {
+			let arr = this.dataList.map(i => i.style.zIndex);
+			let min = Math.min(...arr);
+			let current = this.dataList[index].style.zIndex;
+			if (current > min) {
+				this.dataList.forEach(i => {
+					if (i.style.zIndex == current - 1) {
+						i.style.zIndex++;
+					}
+					return i;
+				})
+				this.dataList[index].style.zIndex--;
+			}
+			this.showMenu = false;
 		},
 		// 选项置顶
 		optionTop(index) {
-			let arr = this.dataList.map(i => i.style.zIndex);
-			let max = Math.max(...arr);
-			console.log(index);
-
-			if (this.dataList[index].style.zIndex < max) {
-				this.dataList[index].style.zIndex = Math.max(...arr) + 1;
-			}
-			console.log(this.dataList.map(i => i.style.zIndex));
+			this.dataList.forEach(i => {
+				let current = this.dataList[index].style.zIndex;
+				if (i.style.zIndex > current) {
+					i.style.zIndex--;
+				}
+				return i;
+			})
+			this.dataList[index].style.zIndex = this.dataList.length - 1;
+			this.showMenu = false;
 		},
-
+		// 选项置底
+		optionBottom(index) {
+			this.dataList.forEach(i => {
+				let current = this.dataList[index].style.zIndex;
+				if (i.style.zIndex < current) {
+					i.style.zIndex++;
+				}
+				return i;
+			})
+			this.dataList[index].style.zIndex = 0;
+			this.showMenu = false;
+		},
+		// 选中
+		check() {
+			this.targetIndex = this.setIndex;
+			this.showMenu = false;
+		},
+		// 取消选中
+		uncheck() {
+			if (this.targetIndex == this.setIndex) {
+				this.targetIndex = null;
+			}
+			this.showMenu = false;
+		},
+		// 获取样式
+		getStyle(key, num) {
+			if (num) {
+				return parseInt(this.dataList[this.targetIndex].style[key]);
+			} else {
+				return this.dataList[this.targetIndex].style[key];
+			}
+		},
+		// 设置样式
+		setStyle(key, value) {
+			this.dataList[this.targetIndex].style[key] = value;
+		},
 		// 随机颜色
 		randomColor() {
 			let color = [];
@@ -401,6 +477,7 @@ export default {
 	height: 100%;
 	background: #474747;
 	display: flex;
+	user-select: none;
 
 	.sidebar {
 		width: 60px;
@@ -439,37 +516,42 @@ export default {
 
 	.core {
 		width: calc(100% - 300px);
+		min-width: 400px;
 		height: 100%;
 		background: #282828;
 		border: 1px solid #383838;
 		box-sizing: border-box;
-		// display: flex;
-		// justify-content: center;
-		// align-items: center;
 		overflow: auto;
 
 		scrollbar-width: thin; // Firefox
-		scrollbar-color: #ccc transparent; // Firefox
+		scrollbar-color: #696969 #4a4a4a; // Firefox
 
 		&::-webkit-scrollbar {
-			width: 8px;
-			height: 8px;
-			background: transparent;
+			width: 14px;
+			height: 14px;
+			background: #4a4a4a;
 		}
 
 		&::-webkit-scrollbar-thumb {
-			background: #ccc;
+			background: #696969;
+			border-radius: 2px;
 		}
 
 		.canvas {
 			transition: all 0.1s;
-			user-select: none;
 			position: relative;
+			margin: 20px;
 
 			.item {
 				position: absolute;
-				top: 30px;
-				left: 30px;
+
+				img {
+					width: 100%;
+					height: 100%;
+					position: absolute;
+					top: 0;
+					left: 0;
+				}
 
 				.border {
 					width: 100%;
@@ -545,6 +627,29 @@ export default {
 
 			.notOptional {
 				pointer-events: none;
+			}
+		}
+
+		.menu {
+			background: #fff;
+			border-radius: 4px;
+			border: 1px solid #e7e7e7;
+			padding: 2px;
+			position: fixed;
+			z-index: 9999;
+
+			p {
+				width: 60px;
+				height: 24px;
+				line-height: 24px;
+				font-size: 12px;
+				border-radius: 4px;
+				display: block;
+				padding: 0 10px;
+
+				&:hover {
+					background: #eeeeee;
+				}
 			}
 		}
 	}
@@ -626,6 +731,7 @@ export default {
 		}
 
 		.projectSettings {
+			@extend .canvasSettings;
 			width: 100%;
 			flex: 1;
 			background: #535353;
