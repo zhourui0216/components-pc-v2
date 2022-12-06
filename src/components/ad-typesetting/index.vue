@@ -173,13 +173,13 @@ export default {
 
 		window.onkeydown = e => {
 			if (e.keyCode == 37) {
-				console.log("左");
+				this.directionmove(-1, 0);
 			} else if (e.keyCode == 38) {
-				console.log("上");
+				this.directionmove(0, -1);
 			} else if (e.keyCode == 39) {
-				console.log("右");
+				this.directionmove(1, 0);
 			} else if (e.keyCode == 40) {
-				console.log("下");
+				this.directionmove(0, 1);
 			}
 		}
 	},
@@ -265,6 +265,27 @@ export default {
 		moveItem(screenX, screenY) {
 			let x = (screenX - this.pressX) / window.devicePixelRatio + this.startX;
 			let y = (screenY - this.pressY) / window.devicePixelRatio + this.startY;
+
+			if (x < 0) {
+				this.setStyle("left", 0);
+			} else if (x + this.startW > this.canvasWidth) {
+				this.setStyle("left", this.canvasWidth - this.startW + "px");
+			} else {
+				this.setStyle("left", x + "px");
+			}
+
+			if (y < 0) {
+				this.setStyle("top", 0);
+			} else if (y + this.startH > this.canvasHeight) {
+				this.setStyle("top", this.canvasHeight - this.startH + "px");
+			} else {
+				this.setStyle("top", y + "px");
+			}
+		},
+		// 方向移动
+		directionmove(deviationX, deviationY) {
+			let x = this.getStyle("left", true) + deviationX;
+			let y = this.getStyle("top", true) + deviationY;
 
 			if (x < 0) {
 				this.setStyle("left", 0);
