@@ -363,6 +363,8 @@ export default {
 		leaveItem() {
 			this.ismove = false;
 			this.iszoom = false;
+            this.showGuideX = false;
+            this.showGuideY = false;
 		},
 		/**
 		 * 按下准备缩放
