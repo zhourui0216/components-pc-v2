@@ -41,9 +41,9 @@
 				<div class="guideY" ref="guideY" v-show="(ismove || iszoom) && showGuideY"></div>
 			</div>
 			<!-- 右键菜单 -->
-			<div class="menu" ref="menu" v-show="showMenu" @mousedown.stop>
-				<p @click="check()">选中</p>
-				<p @click="uncheck()">取消选中</p>
+			<div class="menu" ref="menu" v-show="showMenu" @mousedown.stop @contextmenu.prevent>
+				<p @click="targetIndex == setIndex ? uncheck() : check()"> {{ targetIndex == setIndex ? "取消选中" : "选中" }}</p>
+				<p @click="setScale()" v-if="showMenu">{{ dataList[setIndex].style.scale ? "取消等比例" : "等比例" }}</p>
 				<p @click="uponeLevel(setIndex)">向上一级</p>
 				<p @click="downoneLevel(setIndex)">向下一级</p>
 				<p @click="optionTop(setIndex)">置顶</p>
@@ -110,6 +110,10 @@ export default {
 			startY: 0, // 开始Y轴位置
 			startW: 0, // 开始宽度
 			startH: 0, // 开始高度
+			anchorX: 0, // 锚点X(等比例缩放使用)
+			anchorY: 0, // 锚点Y
+			scale: true, // 是否等比例显示
+			ratio: null, // 缩放比例(宽/高)
 			ismove: false, // 是否移动
 			iszoom: false, // 是否缩放
 			showMenu: false, // 显示菜单
@@ -129,6 +133,7 @@ export default {
 						width: "60px",
 						height: "60px",
 						background: "#ccc",
+						scale: true,
 						zIndex: 3,
 						top: 0,
 						left: 0,
@@ -142,6 +147,7 @@ export default {
 						width: "60px",
 						height: "60px",
 						background: "#ccc",
+						scale: true,
 						zIndex: 2,
 						top: 0,
 						left: 0,
@@ -155,6 +161,7 @@ export default {
 						width: "60px",
 						height: "60px",
 						background: "#ccc",
+						scale: true,
 						zIndex: 1,
 						top: 0,
 						left: 0,
@@ -168,6 +175,7 @@ export default {
 						width: "60px",
 						height: "60px",
 						background: "#ccc",
+						scale: true,
 						zIndex: 0,
 						top: 0,
 						left: 0,
@@ -363,8 +371,8 @@ export default {
 		leaveItem() {
 			this.ismove = false;
 			this.iszoom = false;
-            this.showGuideX = false;
-            this.showGuideY = false;
+			this.showGuideX = false;
+			this.showGuideY = false;
 		},
 		/**
 		 * 按下准备缩放
@@ -372,6 +380,8 @@ export default {
 		 * @param {string} direction 缩放的方向
 		 */
 		readyZoom(e, direction) {
+			this.showMenu = false;
+
 			if (e.button !== 0) {
 				return
 			}
@@ -387,6 +397,44 @@ export default {
 
 			this.startW = this.getStyle("width", true);
 			this.startH = this.getStyle("height", true);
+
+			this.scale = this.dataList[this.targetIndex].style.scale;
+			this.ratio = this.startW / this.startH;
+
+			switch (direction) {
+				case "lt":
+					this.anchorX = this.startX + this.startW;
+					this.anchorY = this.startY + this.startH;
+					break;
+				case "tc":
+					this.anchorX = this.startX + this.startW / 2;
+					this.anchorY = this.startY + this.startH;
+					break;
+				case "rt":
+					this.anchorX = this.startX;
+					this.anchorY = this.startY + this.startH;
+					break;
+				case "lc":
+					this.anchorX = this.startX + this.startW;
+					this.anchorY = this.startY + this.startH / 2;
+					break;
+				case "rc":
+					this.anchorX = this.startX;
+					this.anchorY = this.startY + this.startH / 2;
+					break;
+				case "lb":
+					this.anchorX = this.startX + this.startW;
+					this.anchorY = this.startY;
+					break;
+				case "bc":
+					this.anchorX = this.startX + this.startW / 2;
+					this.anchorY = this.startY;
+					break;
+				case "rb":
+					this.anchorX = this.startX;
+					this.anchorY = this.startY;
+					break;
+			}
 		},
 		/**
 		 * 缩放-左上
@@ -394,8 +442,12 @@ export default {
 		 * @param {number} screenY 缩放时屏幕Y轴位置
 		 */
 		lt(screenX, screenY) {
-			this.lc(screenX, screenY);
-			this.tc(screenX, screenY);
+			if (this.scale) {
+				this.cornerEqualScale("lt", screenX - this.pressX);
+			} else {
+				this.lc(screenX, screenY);
+				this.tc(screenX, screenY);
+			}
 		},
 		/**
 		 * 缩放-上
@@ -407,12 +459,14 @@ export default {
 			let y = -deviation + this.startH;
 			let alignY = this.scaleFindAdsorption(deviation + this.startY, "y");
 
-			if (deviation + this.startY < 0) {
-				this.setStyle("top", 0);
-				this.setStyle("height", this.startY + this.startH + "px");
+			if (this.scale) {
+				this.equalScale("top", y, deviation);
 			} else if (y < 10) {
 				this.setStyle("top", (this.startY + this.startH - 10) + "px");
 				this.setStyle("height", "10px");
+			} else if (deviation + this.startY < 0) {
+				this.setStyle("top", 0);
+				this.setStyle("height", this.startY + this.startH + "px");
 			} else if (alignY >= 0) {
 				this.setStyle("top", alignY + "px");
 				this.setStyle("height", this.startY - alignY + this.startH + "px");
@@ -428,8 +482,12 @@ export default {
 		 * @param {number} screenY 缩放时屏幕Y轴位置
 		 */
 		rt(screenX, screenY) {
-			this.rc(screenX, screenY);
-			this.tc(screenX, screenY);
+			if (this.scale) {
+				this.cornerEqualScale("rt", screenX - this.pressX);
+			} else {
+				this.rc(screenX, screenY);
+				this.tc(screenX, screenY);
+			}
 		},
 		/**
 		 * 缩放-右
@@ -440,7 +498,9 @@ export default {
 			let x = (screenX - this.pressX) / window.devicePixelRatio + this.startW;
 			let alignX = this.scaleFindAdsorption(x + this.startX, "x");
 
-			if (x < 10) {
+			if (this.scale) {
+				this.equalScale("right", x);
+			} else if (x < 10) {
 				this.setStyle("width", "10px");
 			} else if (x + this.startX > this.canvasWidth) {
 				this.setStyle("width", this.canvasWidth - this.startX + "px");
@@ -457,8 +517,12 @@ export default {
 		 * @param {number} screenY 缩放时屏幕Y轴位置
 		 */
 		rb(screenX, screenY) {
-			this.rc(screenX, screenY);
-			this.bc(screenX, screenY);
+			if (this.scale) {
+				this.cornerEqualScale("rb", screenX - this.pressX);
+			} else {
+				this.rc(screenX, screenY, true);
+				this.bc(screenX, screenY, true);
+			}
 		},
 		/**
 		 * 缩放-下
@@ -469,7 +533,9 @@ export default {
 			let y = (screenY - this.pressY) / window.devicePixelRatio + this.startH;
 			let alignY = this.scaleFindAdsorption(y + this.startY, "y");
 
-			if (y < 10) {
+			if (this.scale) {
+				this.equalScale("bottom", y);
+			} else if (y < 10) {
 				this.setStyle("height", "10px");
 			} else if (y + this.startY > this.canvasHeight) {
 				this.setStyle("height", this.canvasHeight - this.startY + "px");
@@ -486,8 +552,12 @@ export default {
 		 * @param {number} screenY 缩放时屏幕Y轴位置
 		 */
 		lb(screenX, screenY) {
-			this.lc(screenX, screenY);
-			this.bc(screenX, screenY);
+			if (this.scale) {
+				this.cornerEqualScale("lb", screenX - this.pressX);
+			} else {
+				this.lc(screenX, screenY);
+				this.bc(screenX, screenY);
+			}
 		},
 		/**
 		 * 缩放-左
@@ -499,12 +569,14 @@ export default {
 			let x = -deviation + this.startW;
 			let alignX = this.scaleFindAdsorption(deviation + this.startX, "x");
 
-			if (deviation + this.startX < 0) {
-				this.setStyle("left", 0);
-				this.setStyle("width", this.startX + this.startW + "px");
+			if (this.scale) {
+				this.equalScale("left", x, deviation);
 			} else if (x < 10) {
 				this.setStyle("left", (this.startX + this.startW - 10) + "px");
 				this.setStyle("width", "10px");
+			} else if (deviation + this.startX < 0) {
+				this.setStyle("left", 0);
+				this.setStyle("width", this.startX + this.startW + "px");
 			} else if (alignX >= 0) {
 				this.setStyle("left", alignX + "px");
 				this.setStyle("width", this.startX - alignX + this.startW + "px");
@@ -593,6 +665,326 @@ export default {
 				this.targetIndex = null;
 			}
 			this.showMenu = false;
+		},
+		// 设置等比例
+		setScale() {
+			this.dataList[this.setIndex].style.scale = !this.scale;
+			this.showMenu = false;
+		},
+		/**
+		 * 等比例缩放
+		 * @param {string} direction 方向(left/right/top/bottom)
+		 * @param {number} size 大小
+		 * @param {number} deviation 向左或向上偏移量
+		 */
+		equalScale(direction, size, deviation) {
+			if (direction == "left") {
+				let height = size / this.ratio;
+				let left = this.anchorX - size;
+				let top = this.startY - (height - this.startH) / 2;
+
+				// 左侧溢出
+				if (left < 0) {
+					size = this.anchorX;
+					height = size / this.ratio;
+					left = 0;
+					top = this.startY - (height - this.startH) / 2;
+				}
+
+				// 顶部溢出
+				if (top < 0) {
+					height = this.anchorY * 2;
+					size = height * this.ratio;
+					left = this.anchorX - size;
+					top = 0;
+				}
+
+				// 底部溢出
+				if (top + height > this.canvasHeight) {
+					height = (this.canvasHeight - this.anchorY) * 2;
+					size = height * this.ratio;
+					left = this.anchorX - size;
+					top = this.canvasHeight - height;
+				}
+
+				// 最小宽度
+				if (size < 10) {
+					size = 10;
+					height = size / this.ratio;
+					left = this.anchorX - size;
+					top = this.anchorY - height / 2;
+				}
+
+				// 最小高度
+				if (height < 10) {
+					height = 10;
+					size = height * this.ratio;
+					left = this.anchorX - size;
+					top = this.anchorY - height / 2;
+				}
+
+				this.setStyle("width", size + "px");
+				this.setStyle("height", height + "px");
+				this.setStyle("left", left + "px");
+				this.setStyle("top", top + "px");
+			} else if (direction == "top") {
+				let width = size * this.ratio;
+				let left = this.startX - (width - this.startW) / 2;
+				let top = this.anchorY - size;
+
+				// 顶部溢出
+				if (top < 0) {
+					size = this.anchorY;
+					width = size * this.ratio;
+					left = this.startX - (width - this.startW) / 2;
+					top = 0;
+				}
+
+				// 左侧溢出
+				if (left < 0) {
+					width = this.anchorX * 2;
+					size = width / this.ratio;
+					left = 0;
+					top = this.anchorY - size;
+				}
+
+				// 右侧溢出
+				if (left + width > this.canvasWidth) {
+					width = (this.canvasWidth - this.anchorX) * 2;
+					size = width / this.ratio;
+					left = this.canvasWidth - width;
+					top = this.anchorY - size;
+				}
+
+				// 最小宽度
+				if (width < 10) {
+					width = 10;
+					size = width / this.ratio;
+					left = this.anchorX - width / 2;
+					top = this.anchorY - size;
+				}
+
+				// 最小高度
+				if (size < 10) {
+					size = 10;
+					width = size * this.ratio;
+					left = this.anchorX - width / 2;
+					top = this.anchorY - size;
+				}
+
+				this.setStyle("width", width + "px");
+				this.setStyle("height", size + "px");
+				this.setStyle("left", left + "px");
+				this.setStyle("top", this.anchorY - size + "px");
+			} else if (direction == "right") {
+				let height = size / this.ratio;
+				let top = this.startY - (height - this.startH) / 2;
+
+				// 右侧溢出
+				if (size + this.anchorX > this.canvasWidth) {
+					size = this.canvasWidth - this.anchorX;
+					height = size / this.ratio;
+					top = this.startY - (height - this.startH) / 2;
+				}
+
+				// 顶部溢出
+				if (top < 0) {
+					height = this.anchorY * 2;
+					size = height * this.ratio;
+					top = 0;
+				}
+
+				// 底部溢出
+				if (top + height > this.canvasHeight) {
+					height = (this.canvasHeight - this.anchorY) * 2;
+					size = height * this.ratio;
+					top = this.canvasHeight - height;
+				}
+
+				// 最小宽度
+				if (size < 10) {
+					size = 10;
+					height = size / this.ratio;
+					top = this.anchorY - height / 2;
+				}
+
+				// 最小高度
+				if (height < 10) {
+					height = 10;
+					size = height * this.ratio;
+					top = this.anchorY - height / 2;
+				}
+
+				this.setStyle("width", size + "px");
+				this.setStyle("height", height + "px");
+				this.setStyle("top", top + "px");
+			} else if (direction == "bottom") {
+				let width = size * this.ratio;
+				let left = this.startX - (width - this.startW) / 2;
+
+				// 底部溢出
+				if (size + this.anchorY > this.canvasHeight) {
+					size = this.canvasHeight - this.anchorY;
+					width = size * this.ratio;
+					left = this.startX - (width - this.startW) / 2;
+				}
+
+				// 左侧溢出
+				if (left < 0) {
+					width = this.anchorX * 2;
+					size = width / this.ratio;
+					left = 0;
+				}
+
+				// 右侧溢出
+				if (left + width > this.canvasWidth) {
+					width = (this.canvasWidth - this.anchorX) * 2;
+					size = width / this.ratio;
+					left = this.canvasWidth - width;
+				}
+
+				// 最小宽度
+				if (width < 10) {
+					width = 10;
+					size = width / this.ratio;
+					left = this.anchorX - width / 2;
+				}
+
+				// 最小高度
+				if (size < 10) {
+					size = 10;
+					width = size * this.ratio;
+					left = this.anchorX - width / 2;
+				}
+
+				this.setStyle("width", width + "px");
+				this.setStyle("height", size + "px");
+				this.setStyle("left", left + "px");
+			}
+		},
+		/**
+		 * 边角等比例缩放
+		 * @param {string} direction 方向
+		 * @param {number} offset 偏移量
+		 */
+		cornerEqualScale(direction, offset) {
+			if (direction == "lt") {
+				let width = this.startW - offset;
+				let height = width / this.ratio;
+				let left = this.anchorX - width;
+				let top = this.anchorY - height;
+
+				// 左侧溢出
+				if (left < 0) {
+					width = this.anchorX;
+					height = width / this.ratio;
+					left = 0;
+					top = this.anchorY - height;
+				}
+
+				// 顶部溢出
+				if (top < 0) {
+					height = this.anchorY
+					width = height * this.ratio;
+					left = this.anchorX - width;
+					top = 0;
+				}
+
+				// 最小宽度
+				if (width < 10) {
+					width = 10;
+					height = width / this.ratio;
+					left = this.anchorX - width;
+					top = this.anchorY - height;
+				}
+
+				this.setStyle("width", width + "px");
+				this.setStyle("height", height + "px");
+				this.setStyle("left", left + "px");
+				this.setStyle("top", top + "px");
+			} else if (direction == "rt") {
+				let width = this.startW + offset;
+				let height = width / this.ratio;
+				let top = this.anchorY - height;
+
+				// 右侧溢出
+				if (width + this.anchorX > this.canvasWidth) {
+					width = this.canvasWidth - this.anchorX;
+					height = width / this.ratio;
+					top = this.anchorY - height;
+				}
+
+				// 顶部溢出
+				if (top < 0) {
+					height = this.anchorY;
+					width = height * this.ratio;
+					top = 0;
+				}
+
+				// 最小宽度
+				if (width < 10) {
+					width = 10;
+					height = width / this.ratio;
+					top = this.anchorY - height;
+				}
+
+				this.setStyle("width", width + "px");
+				this.setStyle("height", height + "px");
+				this.setStyle("top", top + "px");
+			} else if (direction == "rb") {
+				let width = this.startW + offset;
+				let height = width / this.ratio;
+
+				// 右侧溢出
+				if (width + this.anchorX > this.canvasWidth) {
+					width = this.canvasWidth - this.anchorX;
+					height = width / this.ratio;
+				}
+
+				// 底部溢出
+				if (height + this.anchorY > this.canvasHeight) {
+					height = this.canvasHeight - this.anchorY;
+					width = height * this.ratio;
+				}
+
+				// 最小宽度
+				if (width < 10) {
+					width = 10;
+					height = width / this.ratio;
+				}
+
+				this.setStyle("width", width + "px");
+				this.setStyle("height", height + "px");
+			} else if (direction == "lb") {
+				let width = this.startW - offset;
+				let height = width / this.ratio;
+				let left = this.anchorX - width;
+
+				// 左侧溢出
+				if (left < 0) {
+					width = this.anchorX;
+					height = width / this.ratio;
+					left = 0;
+				}
+
+				// 底部溢出
+				if (height + this.anchorY > this.canvasHeight) {
+					height = this.canvasHeight - this.anchorY;
+					width = height * this.ratio;
+					left = this.anchorX - width;
+				}
+
+				// 最小宽度
+				if (width < 10) {
+					width = 10;
+					height = width / this.ratio;
+					left = this.anchorX - width;
+				}
+
+				this.setStyle("width", width + "px");
+				this.setStyle("height", height + "px");
+				this.setStyle("left", left + "px");
+			}
 		},
 		// 获取辅助线
 		getGuide() {
